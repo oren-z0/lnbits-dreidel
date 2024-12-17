@@ -2,8 +2,8 @@
   "repos": [
     {
       "id": "dreidel",
-      "organisation": "lnbits",
-      "repository": "dreidel"
+      "organisation": "oren-z0",
+      "repository": "lnbits-dreidel"
     }
   ]
 }
