@@ -1,7 +1,7 @@
 {
-  "name": "Paywall",
-  "short_description": "Create paywalls for content",
-  "tile": "/paywall/static/image/paywall.png",
+  "name": "Dreidel",
+  "short_description": "Create dreidels for content",
+  "tile": "/dreidel/static/image/dreidel.png",
   "contributors": ["eillarra"],
   "min_lnbits_version": "0.12.5"
 }

@@ -1,9 +1,9 @@
 {
   "repos": [
     {
-      "id": "paywall",
+      "id": "dreidel",
       "organisation": "lnbits",
-      "repository": "paywall"
+      "repository": "dreidel"
     }
   ]
 }

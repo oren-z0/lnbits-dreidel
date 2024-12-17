@@ -3,9 +3,9 @@
   <div class="col-12 col-sm-8 col-md-5 col-lg-4">
     <q-card class="q-pa-lg">
       <q-card-section class="q-pa-none">
-        <h5 class="text-subtitle1 q-mt-none q-mb-sm">{{ paywall.memo }}</h5>
-        {% if paywall.description %}
-        <p>{{ paywall.description }}</p>
+        <h5 class="text-subtitle1 q-mt-none q-mb-sm">{{ dreidel.memo }}</h5>
+        {% if dreidel.description %}
+        <p>{{ dreidel.description }}</p>
         {% endif %}
         <div v-if="!this.redirectUrl" class="q-mt-lg">
           <q-form v-if="">
@@ -13,17 +13,17 @@
               filled
               v-model.number="userAmount"
               type="number"
-              :min="paywallAmount"
+              :min="dreidelAmount"
               suffix="sat"
               label="Choose an amount *"
-              :hint="'Minimum ' + paywallAmount + ' sat'"
+              :hint="'Minimum ' + dreidelAmount + ' sat'"
             >
             </q-input>
             <div class="row q-mt-lg">
               <q-btn
                 unelevated
                 color="primary"
-                :disabled="userAmount < paywallAmount || paymentReq"
+                :disabled="userAmount < dreidelAmount || paymentReq"
                 @click="createInvoice"
                 >Send</q-btn
               >
@@ -52,7 +52,7 @@
         <div v-else>
           <q-separator class="q-my-lg"></q-separator>
           <p>
-            You can access the URL behind this paywall:<br />
+            You can access the URL behind this dreidel:<br />
             <strong style="word-break: break-all;">{% raw %}{{ redirectUrl }}{% endraw %}</strong>
           </p>
           <div class="row q-mt-lg">
@@ -74,8 +74,8 @@
     mixins: [windowMixin],
     data: function () {
       return {
-        userAmount: '{{ paywall.amount }}',
-        paywallAmount: '{{ paywall.amount }}',
+        userAmount: '{{ dreidel.amount }}',
+        dreidelAmount: '{{ dreidel.amount }}',
         paymentReq: null,
         redirectUrl: null,
         paymentDialog: {
@@ -86,8 +86,8 @@
     },
     computed: {
       amount: function () {
-        return this.paywallAmount > this.userAmount
-          ? this.paywallAmount
+        return this.dreidelAmount > this.userAmount
+          ? this.dreidelAmount
           : this.userAmount
       }
     },
@@ -104,7 +104,7 @@
         LNbits.api
           .request(
             'POST',
-            '/paywall/api/v1/paywalls/invoice/{{ paywall.id }}',
+            '/dreidel/api/v1/dreidels/invoice/{{ dreidel.id }}',
             'filler',
             {
               amount: self.amount
@@ -122,7 +122,7 @@
                 LNbits.api
                   .request(
                     'POST',
-                    '/paywall/api/v1/paywalls/check_invoice/{{ paywall.id }}',
+                    '/dreidel/api/v1/dreidels/check_invoice/{{ dreidel.id }}',
                     'filler',
                     {payment_hash: response.data.payment_hash}
                   )
@@ -133,7 +133,7 @@
                         self.redirectUrl = response.data.url
                         if (response.data.remembers) {
                           self.$q.localStorage.set(
-                            'lnbits.paywall.{{ paywall.id }}',
+                            'lnbits.dreidel.{{ dreidel.id }}',
                             response.data.url
                           )
                         }
@@ -157,7 +157,7 @@
       }
     },
     created: function () {
-      var url = this.$q.localStorage.getItem('lnbits.paywall.{{ paywall.id }}')
+      var url = this.$q.localStorage.getItem('lnbits.dreidel.{{ dreidel.id }}')
 
       if (url) {
         this.redirectUrl = url

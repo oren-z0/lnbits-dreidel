@@ -6,7 +6,7 @@ from fastapi import Query
 from pydantic import BaseModel
 
 
-class PaywallFileConfig(BaseModel):
+class DreidelFileConfig(BaseModel):
     url: str
     headers: dict[str, str]
     # todo: nice to have:
@@ -14,30 +14,30 @@ class PaywallFileConfig(BaseModel):
     # max_number_of_downloads: Optional[int]
 
 
-class PaywallConfig(BaseModel):
+class DreidelConfig(BaseModel):
     # possible types: 'url' and 'file'
     type: Optional[str] = "url"
-    file_config: Optional[PaywallFileConfig] = None
+    file_config: Optional[DreidelFileConfig] = None
 
 
-class CreatePaywall(BaseModel):
+class CreateDreidel(BaseModel):
     url: str = Query(...)
     memo: str = Query(...)
     description: str = Query(None)
     amount: int = Query(..., ge=0)
     remembers: bool = Query(...)
-    extras: Optional[PaywallConfig] = None
+    extras: Optional[DreidelConfig] = None
 
 
-class CreatePaywallInvoice(BaseModel):
+class CreateDreidelInvoice(BaseModel):
     amount: int = Query(..., ge=1)
 
 
-class CheckPaywallInvoice(BaseModel):
+class CheckDreidelInvoice(BaseModel):
     payment_hash: str = Query(...)
 
 
-class Paywall(BaseModel):
+class Dreidel(BaseModel):
     id: str
     wallet: str
     url: str
@@ -46,13 +46,13 @@ class Paywall(BaseModel):
     amount: int
     time: int
     remembers: bool
-    extras: Optional[PaywallConfig] = PaywallConfig()
+    extras: Optional[DreidelConfig] = DreidelConfig()
 
     @classmethod
-    def from_row(cls, row: Row) -> "Paywall":
+    def from_row(cls, row: Row) -> "Dreidel":
         data = dict(row)
         data["remembers"] = bool(data["remembers"])
         data["extras"] = (
-            PaywallConfig(**json.loads(data["extras"])) if data["extras"] else None
+            DreidelConfig(**json.loads(data["extras"])) if data["extras"] else None
         )
         return cls(**data)

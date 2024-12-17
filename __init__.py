@@ -8,20 +8,20 @@ from lnbits.db import Database
 from lnbits.helpers import template_renderer
 from lnbits.tasks import create_permanent_unique_task
 
-db = Database("ext_paywall")
+db = Database("ext_dreidel")
 
-paywall_ext: APIRouter = APIRouter(prefix="/paywall", tags=["Paywall"])
+dreidel_ext: APIRouter = APIRouter(prefix="/dreidel", tags=["Dreidel"])
 
-paywall_static_files = [
+dreidel_static_files = [
     {
-        "path": "/paywall/static",
-        "name": "paywall_static",
+        "path": "/dreidel/static",
+        "name": "dreidel_static",
     }
 ]
 
 
-def paywall_renderer():
-    return template_renderer(["paywall/templates"])
+def dreidel_renderer():
+    return template_renderer(["dreidel/templates"])
 
 
 from .tasks import wait_for_paid_invoices, paid_invoices  # noqa: F401,F403,E402
@@ -31,13 +31,13 @@ from .views_api import *  # noqa: F401,F403,E402
 
 scheduled_tasks: list[asyncio.Task] = []
 
-def paywall_stop():
+def dreidel_stop():
     for task in scheduled_tasks:
         try:
             task.cancel()
         except Exception as ex:
             logger.warning(ex)
 
-def paywall_start():
-    task = create_permanent_unique_task("ext_paywall", wait_for_paid_invoices)
+def dreidel_start():
+    task = create_permanent_unique_task("ext_dreidel", wait_for_paid_invoices)
     scheduled_tasks.append(task)

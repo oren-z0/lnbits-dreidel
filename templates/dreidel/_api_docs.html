@@ -4,31 +4,31 @@
   label="API info"
   :content-inset-level="0.5"
 >
-  <q-btn flat label="Swagger API" type="a" href="../docs#/paywall"></q-btn>
-  <q-expansion-item group="api" dense expand-separator label="List paywalls">
+  <q-btn flat label="Swagger API" type="a" href="../docs#/dreidel"></q-btn>
+  <q-expansion-item group="api" dense expand-separator label="List dreidels">
     <q-card>
       <q-card-section>
-        <code><span class="text-blue">GET</span> /paywall/api/v1/paywalls</code>
+        <code><span class="text-blue">GET</span> /dreidel/api/v1/dreidels</code>
         <h5 class="text-caption q-mt-sm q-mb-none">Headers</h5>
         <code>{"X-Api-Key": &lt;invoice_key&gt;}</code><br />
         <h5 class="text-caption q-mt-sm q-mb-none">Body (application/json)</h5>
         <h5 class="text-caption q-mt-sm q-mb-none">
           Returns 200 OK (application/json)
         </h5>
-        <code>[&lt;paywall_object&gt;, ...]</code>
+        <code>[&lt;dreidel_object&gt;, ...]</code>
         <h5 class="text-caption q-mt-sm q-mb-none">Curl example</h5>
         <code
-          >curl -X GET {{ request.base_url }}paywall/api/v1/paywalls -H
+          >curl -X GET {{ request.base_url }}dreidel/api/v1/dreidels -H
           "X-Api-Key: {{ user.wallets[0].inkey }}"
         </code>
       </q-card-section>
     </q-card>
   </q-expansion-item>
-  <q-expansion-item group="api" dense expand-separator label="Create a paywall">
+  <q-expansion-item group="api" dense expand-separator label="Create a dreidel">
     <q-card>
       <q-card-section>
         <code
-          ><span class="text-green">POST</span> /paywall/api/v1/paywalls</code
+          ><span class="text-green">POST</span> /dreidel/api/v1/dreidels</code
         >
         <h5 class="text-caption q-mt-sm q-mb-none">Headers</h5>
         <code>{"X-Api-Key": &lt;admin_key&gt;}</code><br />
@@ -49,7 +49,7 @@
         >
         <h5 class="text-caption q-mt-sm q-mb-none">Curl example</h5>
         <code
-          >curl -X POST {{ request.base_url }}paywall/api/v1/paywalls -d
+          >curl -X POST {{ request.base_url }}dreidel/api/v1/dreidels -d
           '{"url": &lt;string&gt;, "memo": &lt;string&gt;, "description":
           &lt;string&gt;, "amount": &lt;integer&gt;, "remembers":
           &lt;boolean&gt;}' -H "Content-type: application/json" -H "X-Api-Key:
@@ -68,7 +68,7 @@
       <q-card-section>
         <code
           ><span class="text-green">POST</span>
-          /paywall/api/v1/paywalls/invoice/{paywall_id}
+          /dreidel/api/v1/dreidels/invoice/{dreidel_id}
         </code>
         <h5 class="text-caption q-mt-sm q-mb-none">Body (application/json)</h5>
         <code>{"amount": &lt;integer&gt;}</code>
@@ -82,7 +82,7 @@
         <h5 class="text-caption q-mt-sm q-mb-none">Curl example</h5>
         <code
           >curl -X POST {{ request.base_url
-          }}paywall/api/v1/paywalls/invoice/{paywall_id} -d '{"amount":
+          }}dreidel/api/v1/dreidels/invoice/{dreidel_id} -d '{"amount":
           &lt;integer&gt;}' -H "Content-type: application/json"
         </code>
       </q-card-section>
@@ -98,7 +98,7 @@
       <q-card-section>
         <code
           ><span class="text-green">POST</span>
-          /paywall/api/v1/paywalls/check_invoice/&lt;paywall_id&gt;/</code
+          /dreidel/api/v1/dreidels/check_invoice/&lt;dreidel_id&gt;/</code
         >
         <h5 class="text-caption q-mt-sm q-mb-none">Body (application/json)</h5>
         <code>{"payment_hash": &lt;string&gt;}</code>
@@ -113,7 +113,7 @@
         <h5 class="text-caption q-mt-sm q-mb-none">Curl example</h5>
         <code
           >curl -X POST {{ request.base_url
-          }}paywall/api/v1/paywalls/check_invoice/&lt;paywall_id&gt; -d
+          }}dreidel/api/v1/dreidels/check_invoice/&lt;dreidel_id&gt; -d
           '{"payment_hash": &lt;string&gt;}' -H "Content-type: application/json"
         </code>
       </q-card-section>
@@ -123,14 +123,14 @@
     group="api"
     dense
     expand-separator
-    label="Delete a paywall"
+    label="Delete a dreidel"
     class="q-pb-md"
   >
     <q-card>
       <q-card-section>
         <code
           ><span class="text-pink">DELETE</span>
-          /paywall/api/v1/paywalls/&lt;paywall_id&gt;</code
+          /dreidel/api/v1/dreidels/&lt;dreidel_id&gt;</code
         >
         <h5 class="text-caption q-mt-sm q-mb-none">Headers</h5>
         <code>{"X-Api-Key": &lt;admin_key&gt;}</code><br />
@@ -139,7 +139,7 @@
         <h5 class="text-caption q-mt-sm q-mb-none">Curl example</h5>
         <code
           >curl -X DELETE {{ request.base_url
-          }}paywall/api/v1/paywalls/&lt;paywall_id&gt; -H "X-Api-Key: {{
+          }}dreidel/api/v1/dreidels/&lt;dreidel_id&gt; -H "X-Api-Key: {{
           user.wallets[0].adminkey }}"
         </code>
       </q-card-section>

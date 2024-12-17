@@ -4,8 +4,8 @@
   <div class="col-12 col-md-8 col-lg-7 q-gutter-y-md">
     <q-card>
       <q-card-section>
-        <q-btn unelevated color="primary" @click="showPaywallDialog()"
-          >New paywall</q-btn
+        <q-btn unelevated color="primary" @click="showDreidelDialog()"
+          >New dreidel</q-btn
         >
       </q-card-section>
     </q-card>
@@ -14,7 +14,7 @@
       <q-card-section>
         <div class="row items-center no-wrap q-mb-md">
           <div class="col">
-            <h5 class="text-subtitle1 q-my-none">Paywalls</h5>
+            <h5 class="text-subtitle1 q-my-none">Dreidels</h5>
           </div>
           <div class="col-auto">
             <q-btn flat color="grey" @click="exportCSV">Export to CSV</q-btn>
@@ -23,10 +23,10 @@
         <q-table
           dense
           flat
-          :data="paywalls"
+          :data="dreidels"
           row-key="id"
-          :columns="paywallsTable.columns"
-          :pagination.sync="paywallsTable.pagination"
+          :columns="dreidelsTable.columns"
+          :pagination.sync="dreidelsTable.pagination"
         >
           {% raw %}
           <template v-slot:header="props">
@@ -62,7 +62,7 @@
                   target="_blank"
                 ></q-btn>
                 <q-btn
-                  @click="editPaywall(props.row.id)"
+                  @click="editDreidel(props.row.id)"
                   unelevated
                   dense
                   size="xs"
@@ -79,7 +79,7 @@
                   flat
                   dense
                   size="xs"
-                  @click="deletePaywall(props.row.id)"
+                  @click="deleteDreidel(props.row.id)"
                   icon="cancel"
                   color="pink"
                 ></q-btn>
@@ -96,19 +96,19 @@
     <q-card>
       <q-card-section>
         <h6 class="text-subtitle1 q-my-none">
-          {{SITE_TITLE}} paywall extension
+          {{SITE_TITLE}} dreidel extension
         </h6>
       </q-card-section>
       <q-card-section class="q-pa-none">
         <q-separator></q-separator>
-        <q-list> {% include "paywall/_api_docs.html" %} </q-list>
+        <q-list> {% include "dreidel/_api_docs.html" %} </q-list>
       </q-card-section>
     </q-card>
   </div>
 
   <q-dialog v-model="formDialog.show" position="top">
     <q-card v-if="formDialog.show" class="q-pa-lg q-pt-xl lnbits__dialog-card">
-      <q-form @submit="createoOrUpdatePaywall" class="q-gutter-md">
+      <q-form @submit="createoOrUpdateDreidel" class="q-gutter-md">
         <q-select
           filled
           dense
@@ -124,7 +124,7 @@
           dense
           v-model.trim="formDialog.data.memo"
           label="Title *"
-          placeholder="LNbits paywall"
+          placeholder="LNbits dreidel"
         ></q-input>
         <q-input
           filled
@@ -139,8 +139,8 @@
           dense
           emit-value
           v-model="formDialog.data.type"
-          :options="paywallTypeOptions"
-          label="Paywall Type"
+          :options="dreidelTypeOptions"
+          label="Dreidel Type"
         >
         </q-select>
         <div v-if="formDialog.data.type.id == 'url'">
@@ -170,7 +170,7 @@
               <small class=""
                 >An optional `{version}` placeholder can be used in the URL.
                 Example:
-                'https://api.github.com/repos/lnbits/paywall/zipball/{version}'</small
+                'https://api.github.com/repos/lnbits/dreidel/zipball/{version}'</small
               >
             </div>
           </div>
@@ -261,7 +261,7 @@
             color="primary"
             :disable="!isValidForm"
             type="submit"
-            :label="formDialog.data.id ? 'Update Paywall' : 'Create paywall'"
+            :label="formDialog.data.id ? 'Update Dreidel' : 'Create dreidel'"
           ></q-btn>
           <q-btn v-close-popup flat color="grey" class="q-ml-auto"
             >Cancel</q-btn
@@ -273,13 +273,13 @@
 </div>
 {% endblock %} {% block scripts %} {{ window_vars(user) }}
 <script>
-  var mapPaywall = function (obj) {
+  var mapDreidel = function (obj) {
     obj.date = Quasar.utils.date.formatDate(
       new Date(obj.time * 1000),
       'YYYY-MM-DD HH:mm'
     )
     obj.fsat = new Intl.NumberFormat(LOCALE).format(obj.amount)
-    obj.displayUrl = ['/paywall/', obj.id].join('')
+    obj.displayUrl = ['/dreidel/', obj.id].join('')
     obj.type = obj.extras?.type
     obj.fileUrl = obj.extras?.file_config?.url
     if (obj.extras?.file_config?.headers) {
@@ -296,8 +296,8 @@
     mixins: [windowMixin],
     data: function () {
       return {
-        paywalls: [],
-        paywallsTable: {
+        dreidels: [],
+        dreidelsTable: {
           columns: [
             {name: 'id', align: 'left', label: 'ID', field: 'id'},
             {name: 'memo', align: 'left', label: 'Memo', field: 'memo'},
@@ -334,7 +334,7 @@
           showAdvanced: false,
           data: null
         },
-        paywallTypeOptions: [
+        dreidelTypeOptions: [
           {id: 'url', label: 'Redirect URL'},
           {id: 'file', label: 'File Download'}
         ]
@@ -372,37 +372,37 @@
       }
     },
     methods: {
-      emptyPaywall: function () {
+      emptyDreidel: function () {
         return {
           remembers: false,
-          type: this.paywallTypeOptions[0],
+          type: this.dreidelTypeOptions[0],
           url: null,
           fileUrl: null,
           headers: []
         }
       },
-      getPaywalls: function () {
+      getDreidels: function () {
         var self = this
 
         LNbits.api
           .request(
             'GET',
-            '/paywall/api/v1/paywalls?all_wallets=true',
+            '/dreidel/api/v1/dreidels?all_wallets=true',
             this.g.user.wallets[0].inkey
           )
           .then(function (response) {
-            self.paywalls = response.data.map(function (obj) {
-              return mapPaywall(obj)
+            self.dreidels = response.data.map(function (obj) {
+              return mapDreidel(obj)
             })
           })
       },
-      showPaywallDialog: function (paywallData) {
+      showDreidelDialog: function (dreidelData) {
         this.formDialog.show = true
-        this.formDialog.data = paywallData || this.emptyPaywall()
+        this.formDialog.data = dreidelData || this.emptyDreidel()
       },
-      createoOrUpdatePaywall: async function () {
+      createoOrUpdateDreidel: async function () {
         try {
-          const paywall = {
+          const dreidel = {
             url: this.formDialog.data.url || '',
             memo: this.formDialog.data.memo,
             amount: this.formDialog.data.amount,
@@ -411,58 +411,58 @@
             extras: this.extras
           }
 
-          const paywallId = this.formDialog.data.id
+          const dreidelId = this.formDialog.data.id
           let method = 'POST'
-          let path = '/paywall/api/v1/paywalls'
+          let path = '/dreidel/api/v1/dreidels'
           const adminkey = _.findWhere(this.g.user.wallets, {
             id: this.formDialog.data.wallet
           }).adminkey
 
-          if (paywallId) {
+          if (dreidelId) {
             method = 'PATCH'
-            path = `/paywall/api/v1/paywalls/${paywallId}`
+            path = `/dreidel/api/v1/dreidels/${dreidelId}`
           }
 
           const {data} = await LNbits.api.request(
             method,
             path,
             adminkey,
-            paywall
+            dreidel
           )
 
-          this.paywalls = this.paywalls.filter(p => p.id !== data.id)
-          this.paywalls.unshift(mapPaywall(data))
+          this.dreidels = this.dreidels.filter(p => p.id !== data.id)
+          this.dreidels.unshift(mapDreidel(data))
 
           this.formDialog.show = false
-          this.formDialog.data = this.emptyPaywall()
+          this.formDialog.data = this.emptyDreidel()
         } catch (error) {
           LNbits.utils.notifyApiError(error)
         }
       },
-      editPaywall: function (paywallId) {
-        let paywall = this.paywalls.find(p => p.id === paywallId) || {}
-        paywall = {...this.emptyPaywall(), ...paywall}
-        paywall.type =
-          this.paywallTypeOptions.find(p => paywall.type === p.id) ||
-          this.paywallTypeOptions[0]
-        this.showPaywallDialog(paywall)
+      editDreidel: function (dreidelId) {
+        let dreidel = this.dreidels.find(p => p.id === dreidelId) || {}
+        dreidel = {...this.emptyDreidel(), ...dreidel}
+        dreidel.type =
+          this.dreidelTypeOptions.find(p => dreidel.type === p.id) ||
+          this.dreidelTypeOptions[0]
+        this.showDreidelDialog(dreidel)
       },
-      deletePaywall: function (paywallId) {
+      deleteDreidel: function (dreidelId) {
         var self = this
-        var paywall = _.findWhere(this.paywalls, {id: paywallId})
+        var dreidel = _.findWhere(this.dreidels, {id: dreidelId})
 
         LNbits.utils
-          .confirmDialog('Are you sure you want to delete this paywall link?')
+          .confirmDialog('Are you sure you want to delete this dreidel link?')
           .onOk(function () {
             LNbits.api
               .request(
                 'DELETE',
-                '/paywall/api/v1/paywalls/' + paywallId,
-                _.findWhere(self.g.user.wallets, {id: paywall.wallet}).adminkey
+                '/dreidel/api/v1/dreidels/' + dreidelId,
+                _.findWhere(self.g.user.wallets, {id: dreidel.wallet}).adminkey
               )
               .then(function (response) {
-                self.paywalls = _.reject(self.paywalls, function (obj) {
-                  return obj.id == paywallId
+                self.dreidels = _.reject(self.dreidels, function (obj) {
+                  return obj.id == dreidelId
                 })
               })
               .catch(function (error) {
@@ -480,12 +480,12 @@
         }
       },
       exportCSV: function () {
-        LNbits.utils.exportCSV(this.paywallsTable.columns, this.paywalls)
+        LNbits.utils.exportCSV(this.dreidelsTable.columns, this.dreidels)
       }
     },
     created: function () {
       if (this.g.user.wallets.length) {
-        this.getPaywalls()
+        this.getDreidels()
       }
     }
   })

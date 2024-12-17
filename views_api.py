@@ -17,19 +17,19 @@ from lnbits.decorators import (
     require_admin_key,
 )
 
-from . import paywall_ext, paid_invoices
+from . import dreidel_ext, paid_invoices
 from .crud import (
-    create_paywall,
-    delete_paywall,
-    get_paywall,
-    get_paywalls,
-    update_paywall,
+    create_dreidel,
+    delete_dreidel,
+    get_dreidel,
+    get_dreidels,
+    update_dreidel,
 )
-from .models import CheckPaywallInvoice, CreatePaywall, CreatePaywallInvoice, Paywall
+from .models import CheckDreidelInvoice, CreateDreidel, CreateDreidelInvoice, Dreidel
 
 
-@paywall_ext.get("/api/v1/paywalls")
-async def api_paywalls(
+@dreidel_ext.get("/api/v1/dreidels")
+async def api_dreidels(
     wallet: WalletTypeInfo = Depends(get_key_type), all_wallets: bool = Query(False)
 ):
     wallet_ids = [wallet.wallet.id]
@@ -38,70 +38,70 @@ async def api_paywalls(
         user = await get_user(wallet.wallet.user)
         wallet_ids = user.wallet_ids if user else []
 
-    return [paywall.dict() for paywall in await get_paywalls(wallet_ids)]
+    return [dreidel.dict() for dreidel in await get_dreidels(wallet_ids)]
 
 
-@paywall_ext.post("/api/v1/paywalls")
-async def api_paywall_create(
-    data: CreatePaywall, wallet: WalletTypeInfo = Depends(require_admin_key)
+@dreidel_ext.post("/api/v1/dreidels")
+async def api_dreidel_create(
+    data: CreateDreidel, wallet: WalletTypeInfo = Depends(require_admin_key)
 ):
-    paywall = await create_paywall(wallet_id=wallet.wallet.id, data=data)
-    return paywall.dict()
+    dreidel = await create_dreidel(wallet_id=wallet.wallet.id, data=data)
+    return dreidel.dict()
 
 
-@paywall_ext.patch("/api/v1/paywalls/{id}")
-@paywall_ext.put("/api/v1/paywalls/{id}")
-async def api_paywall_update(
-    id: str, data: CreatePaywall, wallet: WalletTypeInfo = Depends(require_admin_key)
+@dreidel_ext.patch("/api/v1/dreidels/{id}")
+@dreidel_ext.put("/api/v1/dreidels/{id}")
+async def api_dreidel_update(
+    id: str, data: CreateDreidel, wallet: WalletTypeInfo = Depends(require_admin_key)
 ):
-    paywall = await update_paywall(id=id, wallet_id=wallet.wallet.id, data=data)
-    return paywall.dict()
+    dreidel = await update_dreidel(id=id, wallet_id=wallet.wallet.id, data=data)
+    return dreidel.dict()
 
 
-@paywall_ext.delete("/api/v1/paywalls/{paywall_id}")
-async def api_paywall_delete(
-    paywall_id: str, wallet: WalletTypeInfo = Depends(require_admin_key)
+@dreidel_ext.delete("/api/v1/dreidels/{dreidel_id}")
+async def api_dreidel_delete(
+    dreidel_id: str, wallet: WalletTypeInfo = Depends(require_admin_key)
 ):
-    paywall = await get_paywall(paywall_id)
+    dreidel = await get_dreidel(dreidel_id)
 
-    if not paywall:
+    if not dreidel:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail="Paywall does not exist."
+            status_code=HTTPStatus.NOT_FOUND, detail="Dreidel does not exist."
         )
 
-    if paywall.wallet != wallet.wallet.id:
+    if dreidel.wallet != wallet.wallet.id:
         raise HTTPException(
-            status_code=HTTPStatus.FORBIDDEN, detail="Not your paywall."
+            status_code=HTTPStatus.FORBIDDEN, detail="Not your dreidel."
         )
 
-    await delete_paywall(paywall_id)
+    await delete_dreidel(dreidel_id)
     return "", HTTPStatus.NO_CONTENT
 
 
-@paywall_ext.post("/api/v1/paywalls/invoice/{paywall_id}")
-async def api_paywall_create_invoice(data: CreatePaywallInvoice, paywall_id: str):
+@dreidel_ext.post("/api/v1/dreidels/invoice/{dreidel_id}")
+async def api_dreidel_create_invoice(data: CreateDreidelInvoice, dreidel_id: str):
     try:
-        paywall = await get_paywall(paywall_id)
-        assert paywall, "Paywall not found"
-        return await _create_paywall_invoice(paywall, data.amount)
+        dreidel = await get_dreidel(dreidel_id)
+        assert dreidel, "Dreidel not found"
+        return await _create_dreidel_invoice(dreidel, data.amount)
     except AssertionError as e:
         raise HTTPException(HTTPStatus.BAD_REQUEST, str(e))
     except Exception as e:
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-@paywall_ext.get("/api/v1/paywalls/invoice/{paywall_id}")
-async def api_paywall_create_fixed_amount_invoice(
-    paywall_id: str, amount: Optional[int] = None
+@dreidel_ext.get("/api/v1/dreidels/invoice/{dreidel_id}")
+async def api_dreidel_create_fixed_amount_invoice(
+    dreidel_id: str, amount: Optional[int] = None
 ):
     try:
-        paywall = await get_paywall(paywall_id)
-        assert paywall, "Paywall not found"
+        dreidel = await get_dreidel(dreidel_id)
+        assert dreidel, "Dreidel not found"
 
         if not amount:
-            return {"amount": paywall.amount}
+            return {"amount": dreidel.amount}
 
-        return await _create_paywall_invoice(paywall, amount)
+        return await _create_dreidel_invoice(dreidel, amount)
     except AssertionError as e:
         raise HTTPException(HTTPStatus.BAD_REQUEST, str(e))
     except Exception as e:
@@ -111,36 +111,36 @@ async def api_paywall_create_fixed_amount_invoice(
         )
 
 
-@paywall_ext.post("/api/v1/paywalls/check_invoice/{paywall_id}")
+@dreidel_ext.post("/api/v1/dreidels/check_invoice/{dreidel_id}")
 async def api_paywal_check_invoice(
-    request: Request, data: CheckPaywallInvoice, paywall_id: str
+    request: Request, data: CheckDreidelInvoice, dreidel_id: str
 ):
-    paywall = await get_paywall(paywall_id)
-    if not paywall:
+    dreidel = await get_dreidel(dreidel_id)
+    if not dreidel:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail="Paywall does not exist."
+            status_code=HTTPStatus.NOT_FOUND, detail="Dreidel does not exist."
         )
-    paid_amount = await _is_payment_made(paywall, data.payment_hash)
+    paid_amount = await _is_payment_made(dreidel, data.payment_hash)
 
     url = (
-        paywall.url
-        or f"{request.base_url}paywall/download/{paywall.id}"
+        dreidel.url
+        or f"{request.base_url}dreidel/download/{dreidel.id}"
         + f"?payment_hash={data.payment_hash}&version=__your_version_here___"
     )
 
     if paid_amount:
-        return {"paid": True, "url": url, "remembers": paywall.remembers}
+        return {"paid": True, "url": url, "remembers": dreidel.remembers}
 
     return {"paid": False}
 
 
-@paywall_ext.websocket("/api/v1/paywalls/invoice/{paywall_id}/{payment_hash}")
-async def websocket_connect(ws: WebSocket, paywall_id: str, payment_hash: str) -> None:
+@dreidel_ext.websocket("/api/v1/dreidels/invoice/{dreidel_id}/{payment_hash}")
+async def websocket_connect(ws: WebSocket, dreidel_id: str, payment_hash: str) -> None:
     try:
         await ws.accept()
 
-        paywall = await get_paywall(paywall_id)
-        if not paywall:
+        dreidel = await get_dreidel(dreidel_id)
+        if not dreidel:
             await ws.send_text(json.dumps({"paid": False}))
             return
 
@@ -152,7 +152,7 @@ async def websocket_connect(ws: WebSocket, paywall_id: str, payment_hash: str) -
             await ws.send_text(json.dumps({"paid": False}))
             return
 
-        if payment.extra.get("tag", None) != "paywall":
+        if payment.extra.get("tag", None) != "dreidel":
             await ws.send_text(json.dumps({"paid": False}))
             return
 
@@ -171,30 +171,30 @@ async def websocket_connect(ws: WebSocket, paywall_id: str, payment_hash: str) -
         await ws.close()
 
 
-@paywall_ext.get("/download/{paywall_id}")
-async def api_paywall_download_file(
-    paywall_id: str, version: Optional[str] = None, payment_hash: Optional[str] = None
+@dreidel_ext.get("/download/{dreidel_id}")
+async def api_dreidel_download_file(
+    dreidel_id: str, version: Optional[str] = None, payment_hash: Optional[str] = None
 ):
     try:
-        logger.info(f"Prepare download for paywall '{paywall_id}'.")
+        logger.info(f"Prepare download for dreidel '{dreidel_id}'.")
         assert payment_hash, "Payment hash is missing."
 
-        paywall = await get_paywall(paywall_id)
-        assert paywall, "Paywall does not exist."
-        assert paywall.extras, "Paywall invalid."
-        assert paywall.extras.type == "file", "Paywall has not file to be downloaded."
+        dreidel = await get_dreidel(dreidel_id)
+        assert dreidel, "Dreidel does not exist."
+        assert dreidel.extras, "Dreidel invalid."
+        assert dreidel.extras.type == "file", "Dreidel has not file to be downloaded."
 
-        file_config = paywall.extras.file_config
+        file_config = dreidel.extras.file_config
         assert file_config, "Cannot find file to download"
 
-        paid_amount = await _is_payment_made(paywall, payment_hash)
+        paid_amount = await _is_payment_made(dreidel, payment_hash)
 
         assert paid_amount, "Invoice not paid."
         logger.info(
-            f"Downloading file for paywall '{paywall_id}'." + f" Version: '{version}'."
+            f"Downloading file for dreidel '{dreidel_id}'." + f" Version: '{version}'."
         )
 
-        headers = {"Content-Disposition": f'attachment; filename="{paywall.memo}"'}
+        headers = {"Content-Disposition": f'attachment; filename="{dreidel.memo}"'}
         if version:
             file_config.url = file_config.url.format(version=version)
         return StreamingResponse(
@@ -208,24 +208,24 @@ async def api_paywall_download_file(
         raise HTTPException(HTTPStatus.INTERNAL_SERVER_ERROR, "Cannot download file.")
     finally:
         logger.info(
-            f"Downloaded file for paywall '{paywall_id}'." + f" Version: '{version}'."
+            f"Downloaded file for dreidel '{dreidel_id}'." + f" Version: '{version}'."
         )
 
 
-@paywall_ext.head("/download/{paywall_id}")
-async def api_paywall_check_file(paywall_id: str, payment_hash: Optional[str] = None):
+@dreidel_ext.head("/download/{dreidel_id}")
+async def api_dreidel_check_file(dreidel_id: str, payment_hash: Optional[str] = None):
     try:
         assert payment_hash, "Payment hash is missing."
 
-        paywall = await get_paywall(paywall_id)
-        assert paywall, "Paywall does not exist."
-        assert paywall.extras, "Paywall invalid."
-        assert paywall.extras.type == "file", "Paywall has not file to be downloaded."
+        dreidel = await get_dreidel(dreidel_id)
+        assert dreidel, "Dreidel does not exist."
+        assert dreidel.extras, "Dreidel invalid."
+        assert dreidel.extras.type == "file", "Dreidel has not file to be downloaded."
 
-        file_config = paywall.extras.file_config
+        file_config = dreidel.extras.file_config
         assert file_config, "Cannot find file to download"
 
-        paid_amount = await _is_payment_made(paywall, payment_hash)
+        paid_amount = await _is_payment_made(dreidel, payment_hash)
 
         assert paid_amount, "Invoice not paid."
 
@@ -246,33 +246,33 @@ async def _file_streamer(url, headers):
         yield dl_file.read()
 
 
-async def _create_paywall_invoice(paywall: Paywall, amount: int):
-    assert amount >= paywall.amount, f"Minimum amount is {paywall.amount} sat."
+async def _create_dreidel_invoice(dreidel: Dreidel, amount: int):
+    assert amount >= dreidel.amount, f"Minimum amount is {dreidel.amount} sat."
     payment_hash, payment_request = await create_invoice(
-        wallet_id=paywall.wallet,
-        amount=max(amount, paywall.amount),
-        memo=f"{paywall.memo}",
-        extra={"tag": "paywall", "id": paywall.id},
+        wallet_id=dreidel.wallet,
+        amount=max(amount, dreidel.amount),
+        memo=f"{dreidel.memo}",
+        extra={"tag": "dreidel", "id": dreidel.id},
     )
     return {"payment_hash": payment_hash, "payment_request": payment_request}
 
 
-async def _is_payment_made(paywall: Paywall, payment_hash: str) -> int:
+async def _is_payment_made(dreidel: Dreidel, payment_hash: str) -> int:
     try:
-        status = await check_transaction_status(paywall.wallet, payment_hash)
+        status = await check_transaction_status(dreidel.wallet, payment_hash)
         is_paid = not status.pending
     except Exception:
         return 0
 
     if is_paid:
         payment = await get_standalone_payment(
-            checking_id_or_hash=payment_hash, incoming=True, wallet_id=paywall.wallet
+            checking_id_or_hash=payment_hash, incoming=True, wallet_id=dreidel.wallet
         )
         assert payment, f"Payment not found for payment_hash: '{payment_hash}'."
-        if payment.extra.get("tag", None) != "paywall":
+        if payment.extra.get("tag", None) != "dreidel":
             return 0
-        paywall_id = payment.extra.get("id", None)
-        if paywall_id and paywall_id != paywall.id:
+        dreidel_id = payment.extra.get("id", None)
+        if dreidel_id and dreidel_id != dreidel.id:
             return 0
 
         return payment.amount

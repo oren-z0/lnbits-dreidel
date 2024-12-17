@@ -7,24 +7,24 @@ from fastapi.requests import Request
 from lnbits.core.models import User
 from lnbits.decorators import check_user_exists
 
-from . import paywall_ext, paywall_renderer
-from .crud import get_paywall
+from . import dreidel_ext, dreidel_renderer
+from .crud import get_dreidel
 
 
-@paywall_ext.get("/")
+@dreidel_ext.get("/")
 async def index(request: Request, user: User = Depends(check_user_exists)):
-    return paywall_renderer().TemplateResponse(
-        "paywall/index.html", {"request": request, "user": user.dict()}
+    return dreidel_renderer().TemplateResponse(
+        "dreidel/index.html", {"request": request, "user": user.dict()}
     )
 
 
-@paywall_ext.get("/{paywall_id}")
-async def display(request: Request, paywall_id: str):
-    paywall = await get_paywall(paywall_id)
-    if not paywall:
+@dreidel_ext.get("/{dreidel_id}")
+async def display(request: Request, dreidel_id: str):
+    dreidel = await get_dreidel(dreidel_id)
+    if not dreidel:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail="Paywall does not exist."
+            status_code=HTTPStatus.NOT_FOUND, detail="Dreidel does not exist."
         )
-    return paywall_renderer().TemplateResponse(
-        "paywall/display.html", {"request": request, "paywall": paywall}
+    return dreidel_renderer().TemplateResponse(
+        "dreidel/display.html", {"request": request, "dreidel": dreidel}
     )

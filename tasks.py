@@ -17,7 +17,7 @@ async def wait_for_paid_invoices():
 
 
 async def on_invoice_paid(payment: Payment) -> None:
-    if payment.extra.get("tag") != "paywall":
+    if payment.extra.get("tag") != "dreidel":
         return
 
     if payment.payment_hash in paid_invoices:
