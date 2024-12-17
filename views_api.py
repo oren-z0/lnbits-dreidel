@@ -122,14 +122,8 @@ async def api_paywal_check_invoice(
         )
     paid_amount = await _is_payment_made(dreidel, data.payment_hash)
 
-    url = (
-        dreidel.url
-        or f"{request.base_url}dreidel/download/{dreidel.id}"
-        + f"?payment_hash={data.payment_hash}&version=__your_version_here___"
-    )
-
     if paid_amount:
-        return {"paid": True, "url": url, "remembers": dreidel.remembers}
+        return {"paid": True, "url": dreidel.url, "remembers": dreidel.remembers}
 
     return {"paid": False}
 
@@ -169,82 +163,6 @@ async def websocket_connect(ws: WebSocket, dreidel_id: str, payment_hash: str) -
         logger.warning(e)
     finally:
         await ws.close()
-
-
-@dreidel_ext.get("/download/{dreidel_id}")
-async def api_dreidel_download_file(
-    dreidel_id: str, version: Optional[str] = None, payment_hash: Optional[str] = None
-):
-    try:
-        logger.info(f"Prepare download for dreidel '{dreidel_id}'.")
-        assert payment_hash, "Payment hash is missing."
-
-        dreidel = await get_dreidel(dreidel_id)
-        assert dreidel, "Dreidel does not exist."
-        assert dreidel.extras, "Dreidel invalid."
-        assert dreidel.extras.type == "file", "Dreidel has not file to be downloaded."
-
-        file_config = dreidel.extras.file_config
-        assert file_config, "Cannot find file to download"
-
-        paid_amount = await _is_payment_made(dreidel, payment_hash)
-
-        assert paid_amount, "Invoice not paid."
-        logger.info(
-            f"Downloading file for dreidel '{dreidel_id}'." + f" Version: '{version}'."
-        )
-
-        headers = {"Content-Disposition": f'attachment; filename="{dreidel.memo}"'}
-        if version:
-            file_config.url = file_config.url.format(version=version)
-        return StreamingResponse(
-            content=_file_streamer(file_config.url, file_config.headers),
-            headers=headers,
-        )
-    except AssertionError as e:
-        raise HTTPException(HTTPStatus.BAD_REQUEST, str(e))
-    except Exception as e:
-        logger.error(e)
-        raise HTTPException(HTTPStatus.INTERNAL_SERVER_ERROR, "Cannot download file.")
-    finally:
-        logger.info(
-            f"Downloaded file for dreidel '{dreidel_id}'." + f" Version: '{version}'."
-        )
-
-
-@dreidel_ext.head("/download/{dreidel_id}")
-async def api_dreidel_check_file(dreidel_id: str, payment_hash: Optional[str] = None):
-    try:
-        assert payment_hash, "Payment hash is missing."
-
-        dreidel = await get_dreidel(dreidel_id)
-        assert dreidel, "Dreidel does not exist."
-        assert dreidel.extras, "Dreidel invalid."
-        assert dreidel.extras.type == "file", "Dreidel has not file to be downloaded."
-
-        file_config = dreidel.extras.file_config
-        assert file_config, "Cannot find file to download"
-
-        paid_amount = await _is_payment_made(dreidel, payment_hash)
-
-        assert paid_amount, "Invoice not paid."
-
-        return Response(
-            status_code=HTTPStatus.CREATED,
-            headers={"paid_sats": f"{int(paid_amount / 1000)}"},
-        )
-
-    except AssertionError as e:
-        raise HTTPException(HTTPStatus.BAD_REQUEST, str(e))
-    except Exception as e:
-        logger.error(e)
-        raise HTTPException(HTTPStatus.INTERNAL_SERVER_ERROR, "Cannot download file.")
-
-
-async def _file_streamer(url, headers):
-    with request.urlopen(request.Request(url=url, headers=headers)) as dl_file:
-        yield dl_file.read()
-
 
 async def _create_dreidel_invoice(dreidel: Dreidel, amount: int):
     assert amount >= dreidel.amount, f"Minimum amount is {dreidel.amount} sat."

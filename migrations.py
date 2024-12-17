@@ -36,8 +36,7 @@ async def m002_redux(db):
             time TIMESTAMP NOT NULL DEFAULT """
         + db.timestamp_now
         + """,
-            remembers INTEGER DEFAULT 0,
-            extras TEXT NULL
+            remembers INTEGER DEFAULT 0
         );
     """
     )

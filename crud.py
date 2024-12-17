@@ -12,8 +12,8 @@ async def create_dreidel(wallet_id: str, data: CreateDreidel) -> Dreidel:
     await db.execute(
         """
         INSERT INTO dreidel.dreidels
-        (id, wallet, url, memo, description, amount, remembers, extras)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        (id, wallet, url, memo, description, amount, remembers)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
         (
             dreidel_id,
@@ -23,7 +23,6 @@ async def create_dreidel(wallet_id: str, data: CreateDreidel) -> Dreidel:
             data.description,
             data.amount,
             int(data.remembers),
-            json.dumps(data.extras.dict()) if data.extras else None,
         ),
     )
 
@@ -36,8 +35,8 @@ async def update_dreidel(id: str, wallet_id: str, data: CreateDreidel) -> Dreide
     await db.execute(
         """
         UPDATE dreidel.dreidels
-        SET (wallet, url, memo, description, amount, remembers, extras) =
-        (?, ?, ?, ?, ?, ?, ?)
+        SET (wallet, url, memo, description, amount, remembers) =
+        (?, ?, ?, ?, ?, ?)
         WHERE id = ? AND wallet = ?
         """,
         (
@@ -47,7 +46,6 @@ async def update_dreidel(id: str, wallet_id: str, data: CreateDreidel) -> Dreide
             data.description,
             data.amount,
             int(data.remembers),
-            json.dumps(data.extras.dict()) if data.extras else None,
             id,
             wallet_id,
         ),

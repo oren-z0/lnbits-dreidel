@@ -134,94 +134,13 @@
           label="Amount (sat) *"
           hint="This is the minimum amount users can pay/donate."
         ></q-input>
-        <q-select
-          filled
-          dense
-          emit-value
-          v-model="formDialog.data.type"
-          :options="dreidelTypeOptions"
-          label="Dreidel Type"
-        >
-        </q-select>
-        <div v-if="formDialog.data.type.id == 'url'">
-          <q-input
-            filled
-            dense
-            v-model.trim="formDialog.data.url"
-            type="url"
-            label="URL *"
-          ></q-input>
-        </div>
-        <div v-else-if="formDialog.data.type.id == 'file'">
-          <q-input
-            filled
-            dense
-            v-model.trim="formDialog.data.fileUrl"
-            type="url"
-            label="File URL *"
-            hint="This is the location of the file. The client will never have direct access to it."
-            class="q-mb-sm"
-          ></q-input>
-          <div class="row q-mb-sm">
-            <div class="col-1">
-              <q-btn icon="info" flat size="sm"></q-btn>
-            </div>
-            <div class="col-11">
-              <small class=""
-                >An optional `{version}` placeholder can be used in the URL.
-                Example:
-                'https://api.github.com/repos/lnbits/dreidel/zipball/{version}'</small
-              >
-            </div>
-          </div>
-          <div class="row q-ml-md q-mb-sm q-mt-sm">
-            <div class="col-12">
-              <div>
-                <q-btn
-                  icon="add"
-                  label="Add Http Header"
-                  @click="addFileHttpHeader"
-                  size="sm"
-                  unelevated
-                  color="secondary"
-                  class="float-right"
-                ></q-btn>
-              </div>
-            </div>
-          </div>
-          <div
-            v-for="(header, index) in formDialog.data.headers"
-            class="row q-mb-sm q-ml-md"
-          >
-            <div class="col-5">
-              <q-input
-                filled
-                dense
-                v-model.trim="header.key"
-                label="Key"
-              ></q-input>
-            </div>
-            <div class="col-5">
-              <q-input
-                filled
-                dense
-                v-model.trim="header.value"
-                label="Value"
-                class="q-pl-sm"
-              ></q-input>
-            </div>
-            <div class="col-2">
-              <q-btn
-                @click="removeFileHttpHeader(index)"
-                icon="clear"
-                size="sm"
-                unelevated
-                color="primary"
-                class="float-right q-mt-sm"
-              ></q-btn>
-            </div>
-          </div>
-        </div>
+        <q-input
+        filled
+        dense
+        v-model.trim="formDialog.data.url"
+        type="url"
+        label="URL *"
+        ></q-input>
         <q-toggle
           label="Advanced"
           v-model="formDialog.showAdvanced"
@@ -280,14 +199,6 @@
     )
     obj.fsat = new Intl.NumberFormat(LOCALE).format(obj.amount)
     obj.displayUrl = ['/dreidel/', obj.id].join('')
-    obj.type = obj.extras?.type
-    obj.fileUrl = obj.extras?.file_config?.url
-    if (obj.extras?.file_config?.headers) {
-      obj.headers = Object.entries(obj.extras?.file_config?.headers).map(h => ({
-        key: h[0],
-        value: h[1]
-      }))
-    }
     return obj
   }
 
@@ -334,37 +245,12 @@
           showAdvanced: false,
           data: null
         },
-        dreidelTypeOptions: [
-          {id: 'url', label: 'Redirect URL'},
-          {id: 'file', label: 'File Download'}
-        ]
       }
     },
     computed: {
-      extras: function () {
-        const type = this.formDialog.data.type.id
-        let file_config = null
-        if (type === 'file') {
-          file_config = {
-            url: this.formDialog.data.fileUrl,
-            headers: this.formDialog.data.headers
-              .filter(v => !!v.key)
-              .reduce((a, h) => {
-                a[h.key] = h.value
-                return a
-              }, {})
-          }
-        }
-        return {type, file_config}
-      },
       isValidForm: function () {
-        const url =
-          this.formDialog.data.type.id === 'url'
-            ? this.formDialog.data.url
-            : this.formDialog.data.fileUrl
-
         return (
-          url &&
+          this.formDialog.data.url &&
           this.formDialog.data.amount &&
           this.formDialog.data.amount >= 0 &&
           this.formDialog.data.memo
@@ -375,9 +261,7 @@
       emptyDreidel: function () {
         return {
           remembers: false,
-          type: this.dreidelTypeOptions[0],
           url: null,
-          fileUrl: null,
           headers: []
         }
       },
@@ -407,8 +291,7 @@
             memo: this.formDialog.data.memo,
             amount: this.formDialog.data.amount,
             description: this.formDialog.data.description,
-            remembers: this.formDialog.data.remembers,
-            extras: this.extras
+            remembers: this.formDialog.data.remembers
           }
 
           const dreidelId = this.formDialog.data.id
@@ -442,9 +325,6 @@
       editDreidel: function (dreidelId) {
         let dreidel = this.dreidels.find(p => p.id === dreidelId) || {}
         dreidel = {...this.emptyDreidel(), ...dreidel}
-        dreidel.type =
-          this.dreidelTypeOptions.find(p => dreidel.type === p.id) ||
-          this.dreidelTypeOptions[0]
         this.showDreidelDialog(dreidel)
       },
       deleteDreidel: function (dreidelId) {
