@@ -24,9 +24,6 @@ async def create_dreidel(wallet_id: str, data: CreateDreidel) -> Dreidel:
             data.players,
             json.dumps({
                 "state": "initial",
-                "players": [0] * data.players,
-                "current_player": 0,
-                "jackpot": 0
             }),
         ),
     )
@@ -57,7 +54,7 @@ async def update_dreidel(id: str, wallet_id: str, data: UpdateDreidel) -> Dreide
     assert dreidel, "Updated dreidel couldn't be retrieved"
     return dreidel
 
-async def update_dreidel_game_state(id: str, wallet_id: str, data: UpdateDreidelGameState) -> Dreidel:
+async def update_dreidel_game_state(id: str, wallet_id: str, game_state: dict, payment_hash: str) -> Dreidel:
     await db.execute(
         """
         UPDATE dreidel.dreidels
@@ -65,7 +62,7 @@ async def update_dreidel_game_state(id: str, wallet_id: str, data: UpdateDreidel
         (?, ?)
         WHERE id = ? AND wallet = ?
         """,
-        (data.game_state, data.payment_hash, id, wallet_id),
+        (json.dumps(game_state), payment_hash, id, wallet_id),
     )
 
     dreidel = await get_dreidel(id)

@@ -3,10 +3,18 @@ from http import HTTPStatus
 import json
 from typing import Optional
 from urllib import request
-
+import random
 from fastapi import Depends, Query, Request, Response
 from fastapi.exceptions import HTTPException
 from loguru import logger
+
+try:
+    from Cryptodome import Random
+    def dreidel_random():
+        return Random.random.randint(0, 3)
+except ImportError:
+    def dreidel_random():
+        return random.randint(0, 3)
 
 from lnbits.core.crud import get_standalone_payment, get_user
 from lnbits.core.services import check_transaction_status, create_invoice
@@ -82,58 +90,88 @@ async def api_dreidel_delete(
     await delete_dreidel(dreidel_id)
     return "", HTTPStatus.NO_CONTENT
 
+@dreidel_ext.get("/api/v1/dreidels/{dreidel_id}/game_state")
+async def api_dreidel_game_state(dreidel_id: str):
+    dreidel = await get_dreidel(dreidel_id)
+    if not dreidel:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="Dreidel game instance does not exist."
+        )
+    game_state = json.loads(dreidel.game_state)
+    paid_amount_msats = await _get_amount_paid(dreidel)
+    if game_state["state"] == "initial":
+        game_state["state"] = "initial_funding"
+        game_state["balances"] = [0] * dreidel.players
+        game_state["current_player"] = 0
+        game_state["jackpot"] = 0
+        payment_hash, payment_request = await _create_dreidel_invoice(dreidel)
+        game_state["payment_request"] = payment_request
+        await update_dreidel_game_state(dreidel_id, dreidel.wallet, game_state, payment_hash)
+    elif paid_amount_msats > 0:
+        game_state["jackpot"] += paid_amount_msats
+        if game_state["state"] == "initial_funding":
+            game_state["current_player"] = (game_state["current_player"] + 1) % dreidel.players
+            if game_state["current_player"] == 0:
+                game_state["state"] = "playing"
+        elif game_state["state"] == "playing":
+            game_state["dreidel_result"] = dreidel_random()
+            if game_state["dreidel_result"] == 0: # Nisht
+                game_state["current_player"] = (game_state["current_player"] + 1) % dreidel.players
+            elif game_state["dreidel_result"] == 1: # Gantz
+                game_state["balances"][game_state["current_player"]] += game_state["jackpot"]
+                game_state["jackpot"] = 0
+                game_state["current_player"] = (game_state["current_player"] + 1) % dreidel.players
+            elif game_state["dreidel_result"] == 2: # Halb
+                halve_amount = game_state["jackpot"] // 2
+                game_state["balances"][game_state["current_player"]] += halve_amount
+                game_state["jackpot"] -= halve_amount
+                game_state["current_player"] = (game_state["current_player"] + 1) % dreidel.players
+            elif game_state["dreidel_result"] == 3: # Shtel
+                game_state["state"] = "shtel"
+        elif game_state["state"] == "shtel":
+            game_state["state"] = "playing"
+            game_state["current_player"] = (game_state["current_player"] + 1) % dreidel.players
+        payment_hash, payment_request = await _create_dreidel_invoice(dreidel)
+        game_state["payment_request"] = payment_request
+        await update_dreidel_game_state(dreidel_id, dreidel.wallet, game_state, payment_hash)
+    game_state["rotate_seconds"] = dreidel.rotate_seconds
+    game_state["ok"] = True
+    return dreidel.game_state
 
 @dreidel_ext.post("/api/v1/dreidels/invoice/{dreidel_id}")
 async def api_dreidel_create_invoice(data: CreateDreidelInvoice, dreidel_id: str):
     try:
         dreidel = await get_dreidel(dreidel_id)
         assert dreidel, "Dreidel not found"
-        return await _create_dreidel_invoice(dreidel)
+        payment_hash, payment_request = await _create_dreidel_invoice(dreidel)
+        return {"payment_hash": payment_hash, "payment_request": payment_request}
     except AssertionError as e:
         raise HTTPException(HTTPStatus.BAD_REQUEST, str(e))
     except Exception as e:
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
 
-
-@dreidel_ext.post("/api/v1/dreidels/check_invoice/{dreidel_id}")
-async def api_paywal_check_invoice(
-    request: Request, data: CheckDreidelInvoice, dreidel_id: str
-):
-    dreidel = await get_dreidel(dreidel_id)
-    if not dreidel:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail="Dreidel does not exist."
-        )
-    paid_amount = await _is_payment_made(dreidel, data.payment_hash)
-
-    if paid_amount:
-        return {"paid": True}
-
-    return {"paid": False}
-
 async def _create_dreidel_invoice(dreidel: Dreidel):
-    payment_hash, payment_request = await create_invoice(
+    return await create_invoice(
         wallet_id=dreidel.wallet,
         amount=dreidel.bet_amount,
         memo=f"{dreidel.memo}",
         extra={"tag": "dreidel", "id": dreidel.id},
     )
-    return {"payment_hash": payment_hash, "payment_request": payment_request}
 
 
-async def _is_payment_made(dreidel: Dreidel, payment_hash: str) -> int:
+async def _get_amount_paid(dreidel: Dreidel) -> int: # in millisats
+    if not dreidel.payment_hash:
+        return 0
     try:
-        status = await check_transaction_status(dreidel.wallet, payment_hash)
+        status = await check_transaction_status(dreidel.wallet, dreidel.payment_hash)
         is_paid = not status.pending
     except Exception:
         return 0
-
     if is_paid:
         payment = await get_standalone_payment(
-            checking_id_or_hash=payment_hash, incoming=True, wallet_id=dreidel.wallet
+            checking_id_or_hash=dreidel.payment_hash, incoming=True, wallet_id=dreidel.wallet
         )
-        assert payment, f"Payment not found for payment_hash: '{payment_hash}'."
-        if payment.extra.get("tag", None) != "dreidel":
+        if not payment or payment.extra.get("tag", None) != "dreidel":
             return 0
         dreidel_id = payment.extra.get("id", None)
         if dreidel_id and dreidel_id != dreidel.id:
