@@ -141,39 +141,6 @@
         type="url"
         label="URL *"
         ></q-input>
-        <q-toggle
-          label="Advanced"
-          v-model="formDialog.showAdvanced"
-          class="q-mt-md"
-        ></q-toggle>
-        <div v-if="formDialog.showAdvanced">
-          <q-input
-            filled
-            dense
-            autogrow
-            v-model.trim="formDialog.data.description"
-            label="Description"
-          ></q-input>
-
-          <q-list>
-            <q-item tag="label" class="rounded-borders">
-              <q-item-section avatar>
-                <q-checkbox
-                  v-model="formDialog.data.remembers"
-                  color="primary"
-                ></q-checkbox>
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>Remember payments</q-item-label>
-                <q-item-label caption
-                  >A succesful payment will be registered in the browser's
-                  storage, so the user doesn't need to pay again to access the
-                  URL.</q-item-label
-                >
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </div>
         <div class="row q-mt-lg">
           <q-btn
             unelevated
@@ -223,12 +190,6 @@
               }
             },
             {
-              name: 'remembers',
-              align: 'left',
-              label: 'Remember',
-              field: 'remembers'
-            },
-            {
               name: 'date',
               align: 'left',
               label: 'Date',
@@ -242,7 +203,6 @@
         },
         formDialog: {
           show: false,
-          showAdvanced: false,
           data: null
         },
       }
@@ -260,7 +220,6 @@
     methods: {
       emptyDreidel: function () {
         return {
-          remembers: false,
           url: null,
           headers: []
         }
@@ -289,9 +248,7 @@
           const dreidel = {
             url: this.formDialog.data.url || '',
             memo: this.formDialog.data.memo,
-            amount: this.formDialog.data.amount,
-            description: this.formDialog.data.description,
-            remembers: this.formDialog.data.remembers
+            amount: this.formDialog.data.amount
           }
 
           const dreidelId = this.formDialog.data.id

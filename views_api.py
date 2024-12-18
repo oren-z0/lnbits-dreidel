@@ -123,7 +123,7 @@ async def api_paywal_check_invoice(
     paid_amount = await _is_payment_made(dreidel, data.payment_hash)
 
     if paid_amount:
-        return {"paid": True, "url": dreidel.url, "remembers": dreidel.remembers}
+        return {"paid": True, "url": dreidel.url}
 
     return {"paid": False}
 

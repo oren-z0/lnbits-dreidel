@@ -9,9 +9,7 @@ from pydantic import BaseModel
 class CreateDreidel(BaseModel):
     url: str = Query(...)
     memo: str = Query(...)
-    description: str = Query(None)
     amount: int = Query(..., ge=0)
-    remembers: bool = Query(...)
 
 
 class CreateDreidelInvoice(BaseModel):
@@ -27,13 +25,10 @@ class Dreidel(BaseModel):
     wallet: str
     url: str
     memo: str
-    description: Optional[str]
     amount: int
     time: int
-    remembers: bool
 
     @classmethod
     def from_row(cls, row: Row) -> "Dreidel":
         data = dict(row)
-        data["remembers"] = bool(data["remembers"])
         return cls(**data)

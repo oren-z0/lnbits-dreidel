@@ -14,7 +14,6 @@ A Dreidel is a way of restricting to content via a purchase or paid subscription
    - select the wallet
    - set the link that will be unlocked after a successful payment
    - give your dreidel a _Title_
-   - an optional small description
    - and set an amount a user must pay to access the hidden content. Note this is the minimum amount, a user can over pay if they wish
    - if _Remember payments_ is checked, a returning paying user won't have to pay again for the same content.\
      ![dreidel config](https://i.imgur.com/CBW48F6.png)

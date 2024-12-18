@@ -4,9 +4,6 @@
     <q-card class="q-pa-lg">
       <q-card-section class="q-pa-none">
         <h5 class="text-subtitle1 q-mt-none q-mb-sm">{{ dreidel.memo }}</h5>
-        {% if dreidel.description %}
-        <p>{{ dreidel.description }}</p>
-        {% endif %}
         <div v-if="!this.redirectUrl" class="q-mt-lg">
           <q-form v-if="">
             <q-input
@@ -131,12 +128,6 @@
                       if (response.data.paid) {
                         self.cancelPayment()
                         self.redirectUrl = response.data.url
-                        if (response.data.remembers) {
-                          self.$q.localStorage.set(
-                            'lnbits.dreidel.{{ dreidel.id }}',
-                            response.data.url
-                          )
-                        }
                         self.$q.notify({
                           type: 'positive',
                           message: 'Payment received!',

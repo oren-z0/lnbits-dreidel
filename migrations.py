@@ -31,12 +31,10 @@ async def m002_redux(db):
             wallet TEXT NOT NULL,
             url TEXT NOT NULL,
             memo TEXT NOT NULL,
-            description TEXT NULL,
             amount {db.big_int} DEFAULT 0,
             time TIMESTAMP NOT NULL DEFAULT """
         + db.timestamp_now
-        + """,
-            remembers INTEGER DEFAULT 0
+        + """
         );
     """
     )
