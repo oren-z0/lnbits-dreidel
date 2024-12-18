@@ -37,7 +37,7 @@ class Dreidel(BaseModel):
     rotate_seconds: int
     players: int
     game_state: str
-    paymeny_hash: str
+    payment_hash: str
     time: int
 
     @classmethod
