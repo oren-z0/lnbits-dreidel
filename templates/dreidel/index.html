@@ -211,8 +211,8 @@
     methods: {
       emptyDreidel: function () {
         return {
-          url: null,
-          headers: []
+          bet_amount: 10,
+          rotate_seconds: 10,
         }
       },
       getDreidels: function () {
@@ -238,7 +238,7 @@
 
           const dreidel = {
             memo: this.formDialog.data.memo,
-            amount: this.formDialog.data.bet_amount,
+            bet_amount: this.formDialog.data.bet_amount,
             rotate_seconds: this.formDialog.data.rotate_seconds,
             ...!dreidelId && {
               players: this.formDialog.data.players,
