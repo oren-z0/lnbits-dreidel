@@ -119,10 +119,10 @@
         <q-input
           filled
           dense
-          v-model.number="formDialog.data.amount"
+          v-model.number="formDialog.data.bet_amount"
           type="number"
-          label="Amount (sat) *"
-          hint="This is the minimum amount users can pay/donate."
+          label="Bet Amount (sat) *"
+          hint="Amount for each bet in the game (there are multiple bets during the game)"
         ></q-input>
         <div class="row q-mt-lg">
           <q-btn
@@ -147,7 +147,7 @@
       new Date(obj.time * 1000),
       'YYYY-MM-DD HH:mm'
     )
-    obj.fsat = new Intl.NumberFormat(LOCALE).format(obj.amount)
+    obj.fsat = new Intl.NumberFormat(LOCALE).format(obj.bet_amount)
     obj.displayUrl = ['/dreidel/', obj.id].join('')
     return obj
   }
@@ -169,7 +169,7 @@
               field: 'fsat',
               sortable: true,
               sort: function (a, b, rowA, rowB) {
-                return rowA.amount - rowB.amount
+                return rowA.bet_amount - rowB.bet_amount
               }
             },
             {
@@ -193,8 +193,8 @@
     computed: {
       isValidForm: function () {
         return (
-          this.formDialog.data.amount &&
-          this.formDialog.data.amount >= 0 &&
+          this.formDialog.data.bet_amount &&
+          this.formDialog.data.bet_amount >= 0 &&
           this.formDialog.data.memo
         )
       }
@@ -229,7 +229,7 @@
         try {
           const dreidel = {
             memo: this.formDialog.data.memo,
-            amount: this.formDialog.data.amount
+            amount: this.formDialog.data.bet_amount
           }
 
           const dreidelId = this.formDialog.data.id

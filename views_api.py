@@ -82,32 +82,11 @@ async def api_dreidel_create_invoice(data: CreateDreidelInvoice, dreidel_id: str
     try:
         dreidel = await get_dreidel(dreidel_id)
         assert dreidel, "Dreidel not found"
-        return await _create_dreidel_invoice(dreidel, data.amount)
+        return await _create_dreidel_invoice(dreidel)
     except AssertionError as e:
         raise HTTPException(HTTPStatus.BAD_REQUEST, str(e))
     except Exception as e:
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
-
-
-@dreidel_ext.get("/api/v1/dreidels/invoice/{dreidel_id}")
-async def api_dreidel_create_fixed_amount_invoice(
-    dreidel_id: str, amount: Optional[int] = None
-):
-    try:
-        dreidel = await get_dreidel(dreidel_id)
-        assert dreidel, "Dreidel not found"
-
-        if not amount:
-            return {"amount": dreidel.amount}
-
-        return await _create_dreidel_invoice(dreidel, amount)
-    except AssertionError as e:
-        raise HTTPException(HTTPStatus.BAD_REQUEST, str(e))
-    except Exception as e:
-        raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail="Cannot create invoice.",
-        )
 
 
 @dreidel_ext.post("/api/v1/dreidels/check_invoice/{dreidel_id}")
@@ -126,11 +105,10 @@ async def api_paywal_check_invoice(
 
     return {"paid": False}
 
-async def _create_dreidel_invoice(dreidel: Dreidel, amount: int):
-    assert amount >= dreidel.amount, f"Minimum amount is {dreidel.amount} sat."
+async def _create_dreidel_invoice(dreidel: Dreidel):
     payment_hash, payment_request = await create_invoice(
         wallet_id=dreidel.wallet,
-        amount=max(amount, dreidel.amount),
+        amount=dreidel.bet_amount,
         memo=f"{dreidel.memo}",
         extra={"tag": "dreidel", "id": dreidel.id},
     )
