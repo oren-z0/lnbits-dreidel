@@ -4,9 +4,8 @@ import json
 from typing import Optional
 from urllib import request
 
-from fastapi import Depends, Query, Request, Response, WebSocket, WebSocketDisconnect
+from fastapi import Depends, Query, Request, Response
 from fastapi.exceptions import HTTPException
-from fastapi.responses import StreamingResponse
 from loguru import logger
 
 from lnbits.core.crud import get_standalone_payment, get_user
@@ -126,43 +125,6 @@ async def api_paywal_check_invoice(
         return {"paid": True, "url": dreidel.url}
 
     return {"paid": False}
-
-
-@dreidel_ext.websocket("/api/v1/dreidels/invoice/{dreidel_id}/{payment_hash}")
-async def websocket_connect(ws: WebSocket, dreidel_id: str, payment_hash: str) -> None:
-    try:
-        await ws.accept()
-
-        dreidel = await get_dreidel(dreidel_id)
-        if not dreidel:
-            await ws.send_text(json.dumps({"paid": False}))
-            return
-
-        payment = await get_standalone_payment(
-            checking_id_or_hash=payment_hash,
-            incoming=True,
-        )
-        if not payment:
-            await ws.send_text(json.dumps({"paid": False}))
-            return
-
-        if payment.extra.get("tag", None) != "dreidel":
-            await ws.send_text(json.dumps({"paid": False}))
-            return
-
-        if not payment.pending:
-            await ws.send_text(json.dumps({"paid": True}))
-            return
-
-        paid_invoices[payment.payment_hash] = Queue()
-        paid_payment = await paid_invoices[payment.payment_hash].get()
-        del paid_invoices[paid_payment.payment_hash]
-        await ws.send_text(json.dumps({"paid": True}))
-
-    except WebSocketDisconnect as e:
-        logger.warning(e)
-    finally:
-        await ws.close()
 
 async def _create_dreidel_invoice(dreidel: Dreidel, amount: int):
     assert amount >= dreidel.amount, f"Minimum amount is {dreidel.amount} sat."
