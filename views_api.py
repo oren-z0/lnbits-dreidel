@@ -24,7 +24,7 @@ from .crud import (
     get_dreidels,
     update_dreidel,
 )
-from .models import CheckDreidelInvoice, CreateDreidel, CreateDreidelInvoice, Dreidel
+from .models import CheckDreidelInvoice, CreateDreidel, UpdateDreidel, CreateDreidelInvoice, Dreidel
 
 
 @dreidel_ext.get("/api/v1/dreidels")
@@ -51,7 +51,7 @@ async def api_dreidel_create(
 @dreidel_ext.patch("/api/v1/dreidels/{id}")
 @dreidel_ext.put("/api/v1/dreidels/{id}")
 async def api_dreidel_update(
-    id: str, data: CreateDreidel, wallet: WalletTypeInfo = Depends(require_admin_key)
+    id: str, data: UpdateDreidel, wallet: WalletTypeInfo = Depends(require_admin_key)
 ):
     dreidel = await update_dreidel(id=id, wallet_id=wallet.wallet.id, data=data)
     return dreidel.dict()

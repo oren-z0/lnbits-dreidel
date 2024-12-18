@@ -124,6 +124,21 @@
           label="Bet Amount (sat) *"
           hint="Amount for each bet in the game (there are multiple bets during the game)"
         ></q-input>
+        <q-input
+          filled
+          dense
+          v-model.number="formDialog.data.rotate_seconds"
+          type="number"
+          label="Rotation seconds *"
+        ></q-input>
+        <q-input
+          v-if="!formDialog.data.id"
+          filled
+          dense
+          v-model.number="formDialog.data.players"
+          type="number"
+          label="Number of players *"
+        ></q-input>
         <div class="row q-mt-lg">
           <q-btn
             unelevated
@@ -142,12 +157,11 @@
 </div>
 {% endblock %} {% block scripts %} {{ window_vars(user) }}
 <script>
-  var mapDreidel = function (obj) {
+  const mapDreidel = function (obj) {
     obj.date = Quasar.utils.date.formatDate(
       new Date(obj.time * 1000),
       'YYYY-MM-DD HH:mm'
     )
-    obj.fsat = new Intl.NumberFormat(LOCALE).format(obj.bet_amount)
     obj.displayUrl = ['/dreidel/', obj.id].join('')
     return obj
   }
@@ -162,16 +176,6 @@
           columns: [
             {name: 'id', align: 'left', label: 'ID', field: 'id'},
             {name: 'memo', align: 'left', label: 'Memo', field: 'memo'},
-            {
-              name: 'amount',
-              align: 'right',
-              label: 'Amount (sat)',
-              field: 'fsat',
-              sortable: true,
-              sort: function (a, b, rowA, rowB) {
-                return rowA.bet_amount - rowB.bet_amount
-              }
-            },
             {
               name: 'date',
               align: 'left',
@@ -194,7 +198,12 @@
       isValidForm: function () {
         return (
           this.formDialog.data.bet_amount &&
-          this.formDialog.data.bet_amount >= 0 &&
+          this.formDialog.data.bet_amount >= 1 &&
+          this.formDialog.data.rotate_seconds &&
+          this.formDialog.data.rotate_seconds >= 1 &&
+          (this.formDialog.data.id ||
+            (this.formDialog.data.players &&
+              this.formDialog.data.players >= 1)) &&
           this.formDialog.data.memo
         )
       }
@@ -216,9 +225,7 @@
             this.g.user.wallets[0].inkey
           )
           .then(function (response) {
-            self.dreidels = response.data.map(function (obj) {
-              return mapDreidel(obj)
-            })
+            self.dreidels = response.data.map(mapDreidel)
           })
       },
       showDreidelDialog: function (dreidelData) {
@@ -227,12 +234,17 @@
       },
       createoOrUpdateDreidel: async function () {
         try {
+          const dreidelId = this.formDialog.data.id
+
           const dreidel = {
             memo: this.formDialog.data.memo,
-            amount: this.formDialog.data.bet_amount
+            amount: this.formDialog.data.bet_amount,
+            rotate_seconds: this.formDialog.data.rotate_seconds,
+            ...!dreidelId && {
+              players: this.formDialog.data.players,
+            },
           }
 
-          const dreidelId = this.formDialog.data.id
           let method = 'POST'
           let path = '/dreidel/api/v1/dreidels'
           const adminkey = _.findWhere(this.g.user.wallets, {
@@ -287,15 +299,6 @@
                 LNbits.utils.notifyApiError(error)
               })
           })
-      },
-      addFileHttpHeader: function () {
-        this.formDialog.data.headers = this.formDialog.data.headers || []
-        this.formDialog.data.headers.push({key: '', value: ''})
-      },
-      removeFileHttpHeader: function (index) {
-        if (index < this.formDialog.data.headers.length) {
-          this.formDialog.data.headers.splice(index, 1)
-        }
       },
       exportCSV: function () {
         LNbits.utils.exportCSV(this.dreidelsTable.columns, this.dreidels)

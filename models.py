@@ -8,8 +8,18 @@ from pydantic import BaseModel
 
 class CreateDreidel(BaseModel):
     memo: str = Query(...)
-    bet_amount: int = Query(..., ge=0)
+    bet_amount: int = Query(..., ge=1)
+    rotate_seconds: int = Query(..., ge=1)
+    players: int = Query(..., ge=1)
 
+class UpdateDreidel(BaseModel):
+    memo: str = Query(...)
+    bet_amount: int = Query(..., ge=1)
+    rotate_seconds: int = Query(..., ge=1)
+
+class UpdateDreidelGameState(BaseModel):
+    game_state: str = Query(...)
+    payment_hash: str = Query(...)
 
 class CreateDreidelInvoice(BaseModel):
     bet_amount: int = Query(..., ge=1)
@@ -24,6 +34,10 @@ class Dreidel(BaseModel):
     wallet: str
     memo: str
     bet_amount: int
+    rotate_seconds: int
+    players: int
+    game_state: str
+    paymeny_hash: str
     time: int
 
     @classmethod

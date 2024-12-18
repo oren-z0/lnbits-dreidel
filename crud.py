@@ -4,7 +4,7 @@ from typing import List, Optional, Union
 from lnbits.helpers import urlsafe_short_hash
 
 from . import db
-from .models import CreateDreidel, Dreidel
+from .models import CreateDreidel, Dreidel, UpdateDreidel
 
 
 async def create_dreidel(wallet_id: str, data: CreateDreidel) -> Dreidel:
@@ -12,15 +12,23 @@ async def create_dreidel(wallet_id: str, data: CreateDreidel) -> Dreidel:
     await db.execute(
         """
         INSERT INTO dreidel.dreidels
-        (id, wallet, url, memo, amount)
-        VALUES (?, ?, ?, ?, ?)
+        (id, wallet, memo, bet_amount, rotate_seconds, players, game_state, payment_hash)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             dreidel_id,
             wallet_id,
-            data.url,
             data.memo,
-            data.amount,
+            data.bet_amount,
+            data.rotate_seconds,
+            data.players,
+            json.dumps({
+                "state": "initial",
+                "players": [0] * data.players,
+                "current_player": 0,
+                "jackpot": 0
+            }),
+            "",
         ),
     )
 
@@ -29,19 +37,18 @@ async def create_dreidel(wallet_id: str, data: CreateDreidel) -> Dreidel:
     return dreidel
 
 
-async def update_dreidel(id: str, wallet_id: str, data: CreateDreidel) -> Dreidel:
+async def update_dreidel(id: str, wallet_id: str, data: UpdateDreidel) -> Dreidel:
     await db.execute(
         """
         UPDATE dreidel.dreidels
-        SET (wallet, url, memo, amount) =
-        (?, ?, ?, ?)
+        SET (memo, bet_amount, rotate_seconds) =
+        (?, ?, ?)
         WHERE id = ? AND wallet = ?
         """,
         (
-            wallet_id,
-            data.url,
             data.memo,
-            data.amount,
+            data.bet_amount,
+            data.rotate_seconds,
             id,
             wallet_id,
         ),
@@ -51,6 +58,20 @@ async def update_dreidel(id: str, wallet_id: str, data: CreateDreidel) -> Dreide
     assert dreidel, "Updated dreidel couldn't be retrieved"
     return dreidel
 
+async def update_dreidel_game_state(id: str, wallet_id: str, data: UpdateDreidelGameState) -> Dreidel:
+    await db.execute(
+        """
+        UPDATE dreidel.dreidels
+        SET (game_state, payment_hash) =
+        (?, ?)
+        WHERE id = ? AND wallet = ?
+        """,
+        (data.game_state, data.payment_hash, id, wallet_id),
+    )
+
+    dreidel = await get_dreidel(id)
+    assert dreidel, "Updated dreidel couldn't be retrieved"
+    return dreidel
 
 async def get_dreidel(dreidel_id: str) -> Optional[Dreidel]:
     row = await db.fetchone(
