@@ -12,7 +12,7 @@ async def m001_initial(db):
             rotate_seconds {db.big_int} NOT NULL,
             players {db.big_int} NOT NULL,
             game_state TEXT NOT NULL,
-            payment_hash TEXT NOT NULL,
+            payment_hash TEXT DEFAULT '',
             time TIMESTAMP NOT NULL DEFAULT """
         + db.timestamp_now
         + """
