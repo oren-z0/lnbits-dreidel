@@ -7,7 +7,6 @@ from pydantic import BaseModel
 
 
 class CreateDreidel(BaseModel):
-    url: str = Query(...)
     memo: str = Query(...)
     amount: int = Query(..., ge=0)
 
@@ -23,7 +22,6 @@ class CheckDreidelInvoice(BaseModel):
 class Dreidel(BaseModel):
     id: str
     wallet: str
-    url: str
     memo: str
     amount: int
     time: int

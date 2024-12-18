@@ -52,16 +52,6 @@
                   target="_blank"
                 ></q-btn>
                 <q-btn
-                  unelevated
-                  dense
-                  size="xs"
-                  icon="link"
-                  :color="($q.dark.isActive) ? 'grey-7' : 'grey-5'"
-                  type="a"
-                  :href="props.row.url"
-                  target="_blank"
-                ></q-btn>
-                <q-btn
                   @click="editDreidel(props.row.id)"
                   unelevated
                   dense
@@ -134,13 +124,6 @@
           label="Amount (sat) *"
           hint="This is the minimum amount users can pay/donate."
         ></q-input>
-        <q-input
-        filled
-        dense
-        v-model.trim="formDialog.data.url"
-        type="url"
-        label="URL *"
-        ></q-input>
         <div class="row q-mt-lg">
           <q-btn
             unelevated
@@ -210,7 +193,6 @@
     computed: {
       isValidForm: function () {
         return (
-          this.formDialog.data.url &&
           this.formDialog.data.amount &&
           this.formDialog.data.amount >= 0 &&
           this.formDialog.data.memo
@@ -246,7 +228,6 @@
       createoOrUpdateDreidel: async function () {
         try {
           const dreidel = {
-            url: this.formDialog.data.url || '',
             memo: this.formDialog.data.memo,
             amount: this.formDialog.data.amount
           }
