@@ -4,7 +4,7 @@ from typing import List, Optional, Union
 from lnbits.helpers import urlsafe_short_hash
 
 from . import db
-from .models import CreateDreidel, Dreidel, UpdateDreidel
+from .models import CreateDreidel, Dreidel, UpdateDreidel, UpdateDreidelGameState
 
 
 async def create_dreidel(wallet_id: str, data: CreateDreidel) -> Dreidel:

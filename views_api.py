@@ -37,7 +37,13 @@ async def api_dreidels(
         user = await get_user(wallet.wallet.user)
         wallet_ids = user.wallet_ids if user else []
 
-    return [dreidel.dict() for dreidel in await get_dreidels(wallet_ids)]
+    results = []
+    for dreidel in await get_dreidels(wallet_ids):
+        dreidel_dict = dreidel.dict()
+        del dreidel_dict["payment_hash"]
+        results.append(dreidel_dict)
+
+    return results
 
 
 @dreidel_ext.post("/api/v1/dreidels")
