@@ -1,9 +1,8 @@
 /* pyramid author : Selim Khemissi http://www.khemissi.com http://www.khemissi.com/examples/css3/010-3D-pyramid/ */
 .stage {
   position: relative;
-  top: 300px;
-  width: 150px;
-  height: 320px;
+  padding-top: 230px;
+  padding-bottom: 40px;
   margin: auto;
   perspective: 1200px;
   perspective-origin: 50% 50%;
@@ -15,7 +14,7 @@
   margin: 0 auto;
   transition: transform 1s ease-out;
   transform-style: preserve-3d;
-  transform: rotateX(50deg) rotateY(0deg) rotate(45deg);
+  transform: rotateX(75deg) rotateY(0deg) rotate(45deg);
 }
 .triangle, .square {
   transform-style: preserve-3d;
