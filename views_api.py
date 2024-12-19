@@ -140,7 +140,7 @@ async def api_dreidel_game_state(dreidel_id: str):
         await update_dreidel_game_state(dreidel_id, dreidel.wallet, game_state, payment_hash)
     game_state["rotate_seconds"] = dreidel.rotate_seconds
     game_state["ok"] = True
-    return dreidel.game_state
+    return game_state
 
 async def _create_dreidel_invoice(dreidel: Dreidel):
     return await create_invoice(
