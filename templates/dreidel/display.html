@@ -4,22 +4,64 @@
     <q-card class="q-pa-lg">
       <q-card-section class="q-pa-none">
         <h5 class="text-subtitle1 q-mt-none q-mb-sm">{{ dreidel.memo }}</h5>
-        <div v-if="paymentReq" class="q-mt-lg">
-          <a class="text-secondary" :href="'lightning:' + paymentReq">
+        <div v-if="gameState.balances" class="q-mt-lg">
+          <div v-for="(balance, playerIndex) in gameState.balances" :key="playerIndex">
+            <div class="row justify-center">
+              <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="text-h6">
+                  Player <span v-text="playerIndex + 1"></span> balance: <span v-text="balance / 1000"></span> sats
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row justify-center">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+              <div class="text-h6">
+                Jackpot: <span v-text="gameState.jackpot / 1000"></span> sats
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="dreidel-container" class="q-mt-lg">
+          Dreidel <span v-text="isAnimating ? 'is spinning' : 'is not spinning'"></span>
+        </div>
+        <div v-if="!isAnimating && lastGameState.state === 'playing'" class="q-mt-lg">
+          <div class="row justify-center">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+              <div class="text-h2">
+                <span v-text="titles[lastGameState.dreidel_result]"></span>
+              </div>
+            </div>
+          </div>
+          <div class="row justify-center">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+              <div class="text-h6" v-text="dreidelDescription"></div>
+            </div>
+          </div>
+        </div>
+        <div v-if="!isAnimating && gameState.payment_request" class="q-mt-lg">
+          <div class="row justify-center">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+              <div class="text-h6">
+                Player <span v-text="gameState.current_player + 1"></span> please pay the invoice
+                <span v-if="gameState.state === 'initial_funding'">to join the game.</span>
+                <span v-else-if="gameState.state === 'playing'">to spin the dreidel.</span>
+                <span v-else-if="gameState.state === 'shtel'">to continue.</span>
+              </div>
+            </div>
+          </div>
+          <a class="text-secondary" :href="'lightning:' + gameState.payment_request">
             <q-responsive :ratio="1" class="q-mx-xl q-mb-md">
               <qrcode
-                :value="'lightning:' + paymentReq.toUpperCase()"
+                :value="'lightning:' + gameState.payment_request.toUpperCase()"
                 :options="{width: 800}"
                 class="rounded-borders"
               ></qrcode>
             </q-responsive>
           </a>
           <div class="row q-mt-lg">
-            <q-btn outline color="grey" @click="copyText(paymentReq)"
+            <q-btn outline color="grey" @click="copyText(gameState.payment_request)"
               >Copy invoice</q-btn
-            >
-            <q-btn @click="cancelPayment" flat color="grey" class="q-ml-auto"
-              >Cancel</q-btn
             >
           </div>
         </div>
@@ -34,81 +76,73 @@
   new Vue({
     el: '#vue',
     mixins: [windowMixin],
-    data: function () {
+    data() {
       return {
-        userAmount: '{{ dreidel.amount }}',
-        dreidelAmount: '{{ dreidel.amount }}',
-        paymentReq: null,
-        paymentDialog: {
-          dismissMsg: null,
-          checker: null
-        }
+        titles: [
+          "Nisht - נישט",
+          "Gantz - גאַנץ",
+          "Halb - האַלב",
+          "Shtel Arayn - שטעל אַרַײן",
+        ],
+        lastGameState: {
+          "state": "loading",
+        },
+        isAnimating: false,
+        gameState: {
+          state: "loading",
+        },
       }
     },
+    mounted() {
+      void this.reloadGameState();
+    },
     computed: {
+      dreidelDescription() {
+        switch (this.lastGameState.dreidel_result) {
+          case 0:
+            return `Player ${this.lastGameState.current_player + 1} won nothing.`;
+          case 1:
+            return `Player ${this.lastGameState.current_player + 1} won the entire jackpot.`;
+          case 2:
+            return `Player ${this.lastGameState.current_player + 1} won half the jackpot.`;
+          case 3:
+            return `Player ${this.lastGameState.current_player + 1} won must pay another time.`;
+          default:
+            return "";
+        }
+      },
       amount: function () {
         return this.dreidelAmount > this.userAmount
           ? this.dreidelAmount
           : this.userAmount
-      }
+      },
     },
     methods: {
-      cancelPayment: function () {
-        this.paymentReq = null
-        clearInterval(this.paymentDialog.checker)
-        if (this.paymentDialog.dismissMsg) {
-          this.paymentDialog.dismissMsg()
+      async reloadGameState() {
+        let response;
+        try {
+          response = LNbits.api.request('GET', '/dreidel/api/v1/dreidels/game_state/{{ dreidel.id }}', 'filler');
+          if (!response.data.ok) {
+            throw new Error("Bad response");
         }
+        } catch (error) {
+          LNbits.utils.notifyApiError(error);
+          setTimeout(this.reloadGameState, 5000);
+          return;
+        }
+        if (response.data.updated_at === this.gameState.updated_at) {
+          setTimeout(this.reloadGameState, 2000);
+          return;
+        }
+        if (this.gameState.state === "playing" && this.gameState.current_player !== undefined) {
+          this.isAnimating = true;
+          await new Promise(resolve => setTimeout(resolve, response.data.rotate_seconds * 1000));
+          this.isAnimating = false;
+        }
+        this.lastGameState = this.gameState;
+        this.gameState = response.data;
+        setTimeout(this.reloadGameState, 2000);
       },
-      createInvoice: function () {
-        var self = this
-        LNbits.api
-          .request(
-            'POST',
-            '/dreidel/api/v1/dreidels/invoice/{{ dreidel.id }}',
-            'filler',
-            {
-              amount: self.amount
-            }
-          )
-          .then(function (response) {
-            if (response.data) {
-              self.paymentReq = response.data.payment_request.toUpperCase()
-              self.paymentDialog.dismissMsg = self.$q.notify({
-                timeout: 0,
-                message: 'Waiting for payment...'
-              })
-
-              self.paymentDialog.checker = setInterval(function () {
-                LNbits.api
-                  .request(
-                    'POST',
-                    '/dreidel/api/v1/dreidels/check_invoice/{{ dreidel.id }}',
-                    'filler',
-                    {payment_hash: response.data.payment_hash}
-                  )
-                  .then(function (response) {
-                    if (response.data) {
-                      if (response.data.paid) {
-                        self.cancelPayment()
-                        self.$q.notify({
-                          type: 'positive',
-                          message: 'Payment received!',
-                          icon: null
-                        })
-                      }
-                    }
-                  })
-                  .catch(function (error) {
-                    LNbits.utils.notifyApiError(error)
-                  })
-              }, 2000)
-            }
-          })
-          .catch(function (error) {
-            LNbits.utils.notifyApiError(error)
-          })
-      }
     },
   })
 </script>
