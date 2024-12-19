@@ -126,7 +126,7 @@
       async reloadGameState() {
         let response;
         try {
-          response = await LNbits.api.request('GET', '/dreidel/api/v1/dreidels/{{ dreidel.id }}/game_state', 'filler');
+          response = await LNbits.api.request('GET', '/dreidel/api/v1/dreidels/{{ dreidel.id }}/state', 'filler');
           if (!response.data.ok) {
             throw new Error("Bad response");
           }

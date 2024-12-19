@@ -92,7 +92,7 @@ async def api_dreidel_delete(
     await delete_dreidel(dreidel_id)
     return "", HTTPStatus.NO_CONTENT
 
-@dreidel_ext.get("/api/v1/dreidels/{dreidel_id}/game_state")
+@dreidel_ext.get("/api/v1/dreidels/{dreidel_id}/state")
 async def api_dreidel_game_state(dreidel_id: str):
     dreidel = await get_dreidel(dreidel_id)
     if not dreidel:
