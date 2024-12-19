@@ -4,6 +4,7 @@ import json
 from typing import Optional
 from urllib import request
 import random
+from time import time
 from fastapi import Depends, Query, Request, Response
 from fastapi.exceptions import HTTPException
 from loguru import logger
@@ -106,6 +107,7 @@ async def api_dreidel_game_state(dreidel_id: str):
         game_state["jackpot"] = 0
         payment_hash, payment_request = await _create_dreidel_invoice(dreidel)
         game_state["payment_request"] = payment_request
+        game_state["updated_at"] = time()
         await update_dreidel_game_state(dreidel_id, dreidel.wallet, game_state, payment_hash)
     elif paid_amount_msats > 0:
         game_state["jackpot"] += paid_amount_msats
@@ -133,6 +135,7 @@ async def api_dreidel_game_state(dreidel_id: str):
             game_state["current_player"] = (game_state["current_player"] + 1) % dreidel.players
         payment_hash, payment_request = await _create_dreidel_invoice(dreidel)
         game_state["payment_request"] = payment_request
+        game_state["updated_at"] = time()
         await update_dreidel_game_state(dreidel_id, dreidel.wallet, game_state, payment_hash)
     game_state["rotate_seconds"] = dreidel.rotate_seconds
     game_state["ok"] = True
