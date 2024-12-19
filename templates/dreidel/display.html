@@ -9,7 +9,7 @@
             <div class="row justify-center">
               <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                 <div class="text-h6">
-                  Player <span v-text="playerIndex + 1"></span> balance: <span v-text="balance / 1000"></span> sats
+                  Player <span v-text="playerIndex + 1"></span> balance: <span v-text="balance / 1000 | formatSats"></span> sats
                 </div>
               </div>
             </div>
@@ -17,7 +17,7 @@
           <div class="row justify-center">
             <div class="col-12 col-sm-6 col-md-4 col-lg-3">
               <div class="text-h6">
-                Jackpot: <span v-text="gameState.jackpot / 1000"></span> sats
+                Jackpot: <span v-text="gameState.jackpot / 1000 | formatSats"></span> sats
               </div>
             </div>
           </div>
@@ -116,6 +116,11 @@
           ? this.dreidelAmount
           : this.userAmount
       },
+    },
+    filters: {
+      formatSats(value) {
+        return new Intl.NumberFormat('en-US', { maximumFractionDigits: 3}).format(value);
+      }
     },
     methods: {
       async reloadGameState() {
