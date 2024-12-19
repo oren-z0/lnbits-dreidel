@@ -170,12 +170,12 @@
           this.isAnimating = true
           this.gameState.jackpot += responseData.paid_amount
           this.dreidelTimeoutSeconds = responseData.rotate_seconds
-          this.dreidelAngle = initialAngle + (responseData.dreidel_result * 90) + (Math.floor((this.dreidelAngle - initialAngle) / 360) + responseData.rotate_seconds) * 360
+          this.dreidelAngle = initialAngle + ((4 - responseData.dreidel_result) * 90) + (Math.floor((this.dreidelAngle - initialAngle) / 360) + responseData.rotate_seconds) * 360
           await new Promise(resolve => setTimeout(resolve, responseData.rotate_seconds * 1000))
           this.isAnimating = false
         } else if (this.gameState.state === "shtel") {
           this.dreidelTimeoutSeconds = 0
-          this.dreidelAngle = initialAngle + 3 * 90
+          this.dreidelAngle = 360 // initlalAngle + (4 - 3) * 90
         }
         this.lastGameState = this.gameState
         this.gameState = responseData
