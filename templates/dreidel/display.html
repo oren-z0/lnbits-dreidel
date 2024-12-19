@@ -84,6 +84,7 @@
         gameState: {
           state: "loading",
         },
+        timeout: null,
       }
     },
     mounted() {
@@ -111,6 +112,12 @@
       }
     },
     methods: {
+      resetTimeout(callback, timeoutMs) {
+        if (this.timeout) {
+          clearTimeout(this.timeout);
+        }
+        this.timeout = setTimeout(callback, timeoutMs);
+      },
       async reloadGameState() {
         let responseData;
         try {
@@ -122,11 +129,11 @@
           }
         } catch (error) {
           LNbits.utils.notifyApiError(error);
-          setTimeout(this.reloadGameState, 5000);
+          this.resetTimeout(this.reloadGameState, 5000);
           return;
         }
         if (responseData.updated_at === this.gameState.updated_at) {
-          setTimeout(this.reloadGameState, 2000);
+          this.resetTimeout(this.reloadGameState, 2000);
           return;
         }
         if (this.gameState.state === "playing" && this.gameState.current_player !== undefined) {
@@ -136,8 +143,14 @@
         }
         this.lastGameState = this.gameState;
         this.gameState = responseData;
-        setTimeout(this.reloadGameState, 2000);
+        this.resetTimeout(this.reloadGameState, 2000);
       },
+    },
+    beforeDestroy() {
+      if (this.timeout) {
+        clearTimeout(this.timeout);
+        this.timeout = null;
+      }
     },
   })
 </script>
