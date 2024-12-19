@@ -23,7 +23,7 @@
           </div>
         </div>
         <div class="stage">
-          <div class="pyramid3d">
+          <div class="pyramid3d" :style="spinStyle">
               <div class="square side1"></div>
               <div class="square side2">נ</div>
               <div class="square side3">ה</div>
@@ -40,9 +40,6 @@
               <div class="triangle side5"></div>
           </div>
         </div>
-        <div>
-          Dreidel <span v-text="isAnimating ? 'is spinning' : 'is not spinning'"></span>
-        </div>
         <div v-if="!isAnimating && lastGameState.state === 'playing'" class="q-mt-lg">
           <div class="row justify-center">
             <div class="text-h4">
@@ -54,7 +51,7 @@
           </div>
         </div>
         <div v-if="!isAnimating && gameState.payment_request" class="q-mt-lg">
-          <div class="row justify-center q-mb-sm">
+          <div class="row justify-center">
             <div class="text-body1">
               Player <span v-text="gameState.current_player + 1"></span> please pay the invoice
               <span v-if="gameState.state === 'initial_funding'">to join the game.</span>
@@ -62,7 +59,7 @@
               <span v-else-if="gameState.state === 'shtel'">to continue.</span>
             </div>
           </div>
-          <div class="row justify-center">
+          <div class="row justify-center q-my-md">
             <div class="col-10 col-md-8 col-lg-6 col-xl-6">
               <a class="text-secondary" :href="'lightning:' + gameState.payment_request">
                 <q-responsive :ratio="1" class="q-mb-md">
@@ -75,10 +72,10 @@
               </a>
             </div>
           </div>
-          <div class="row q-mt-lg">
-            <q-btn outline color="grey" @click="copyText(gameState.payment_request)"
-              >Copy invoice</q-btn
-            >
+          <div class="row justify-center">
+            <q-btn outline color="grey" @click="copyText(gameState.payment_request)">
+              Copy invoice
+            </q-btn>
           </div>
         </div>
       </q-card-section>
@@ -89,11 +86,15 @@
 <script>
   Vue.component(VueQrcode.name, VueQrcode)
 
+  const initialAngle = 270
+
   new Vue({
     el: '#vue',
     mixins: [windowMixin],
     data() {
       return {
+        dreidelAngle: initialAngle,
+        dreidelTimeoutSeconds: 0,
         titles: [
           "Nisht - נישט",
           "Gantz - גאַנץ",
@@ -107,73 +108,84 @@
         gameState: {
           state: "loading",
         },
-        timeout: null,
+        reloadTimeout: null,
       }
     },
     mounted() {
-      void this.reloadGameState();
+      void this.reloadGameState()
     },
     computed: {
       dreidelResultDescription() {
         switch (this.gameState.dreidel_result) {
           case 0:
-            return `Player ${this.lastGameState.current_player + 1} won nothing.`;
+            return `Player ${this.lastGameState.current_player + 1} won nothing.`
           case 1:
-            return `Player ${this.lastGameState.current_player + 1} won the entire jackpot.`;
+            return `Player ${this.lastGameState.current_player + 1} won the entire jackpot.`
           case 2:
-            return `Player ${this.lastGameState.current_player + 1} won half the jackpot.`;
+            return `Player ${this.lastGameState.current_player + 1} won half the jackpot.`
           case 3:
-            return `Player ${this.lastGameState.current_player + 1} lost - must pay again.`;
+            return `Player ${this.lastGameState.current_player + 1} lost - must pay again.`
           default:
-            return "";
+            return ""
+        }
+      },
+      spinStyle() {
+        return {
+          transition: `transform ${this.dreidelTimeoutSeconds}s ease-out`,
+          transform: `rotateX(80deg) rotateY(0deg) rotate(${this.dreidelAngle}deg)`,
         }
       },
     },
     filters: {
       formatSats(value) {
-        return new Intl.NumberFormat('en-US', { maximumFractionDigits: 3}).format(value);
+        return new Intl.NumberFormat('en-US', { maximumFractionDigits: 3}).format(value)
       }
     },
     methods: {
-      resetTimeout(callback, timeoutMs) {
-        if (this.timeout) {
-          clearTimeout(this.timeout);
+      resetReloadTimeout(callback, timeoutMs) {
+        if (this.reloadTimeout) {
+          clearTimeout(this.reloadTimeout)
         }
-        this.timeout = setTimeout(callback, timeoutMs);
+        this.reloadTimeout = setTimeout(callback, timeoutMs)
       },
       async reloadGameState() {
-        let responseData;
+        let responseData
         try {
           // Not using LNbits.api.request because the loading bar is annoying.
-          const response = await fetch('/dreidel/api/v1/dreidels/{{ dreidel.id }}/state');
-          responseData = await response.json();
+          const response = await fetch('/dreidel/api/v1/dreidels/{{ dreidel.id }}/state')
+          responseData = await response.json()
           if (!responseData.ok) {
-            throw new Error("Bad response");
+            throw new Error("Bad response")
           }
         } catch (error) {
-          LNbits.utils.notifyApiError(error);
-          this.resetTimeout(this.reloadGameState, 5000);
-          return;
+          LNbits.utils.notifyApiError(error)
+          this.resetReloadTimeout(this.reloadGameState, 5000)
+          return
         }
         if (responseData.updated_at === this.gameState.updated_at) {
-          this.resetTimeout(this.reloadGameState, 2000);
-          return;
+          this.resetReloadTimeout(this.reloadGameState, 2000)
+          return
         }
         if (this.gameState.state === "playing") {
-          this.isAnimating = true;
-          this.gameState.jackpot += responseData.paid_amount;
-          await new Promise(resolve => setTimeout(resolve, responseData.rotate_seconds * 1000));
-          this.isAnimating = false;
+          this.isAnimating = true
+          this.gameState.jackpot += responseData.paid_amount
+          this.dreidelTimeoutSeconds = responseData.rotate_seconds
+          this.dreidelAngle = initialAngle + (responseData.dreidel_result * 90) + (Math.floor((this.dreidelAngle - initialAngle) / 360) + responseData.rotate_seconds) * 360
+          await new Promise(resolve => setTimeout(resolve, responseData.rotate_seconds * 1000))
+          this.isAnimating = false
+        } else if (this.gameState.state === "shtel") {
+          this.dreidelTimeoutSeconds = 0
+          this.dreidelAngle = initialAngle + 3 * 90
         }
-        this.lastGameState = this.gameState;
-        this.gameState = responseData;
-        this.resetTimeout(this.reloadGameState, 2000);
+        this.lastGameState = this.gameState
+        this.gameState = responseData
+        this.resetReloadTimeout(this.reloadGameState, 2000)
       },
     },
     beforeDestroy() {
-      if (this.timeout) {
-        clearTimeout(this.timeout);
-        this.timeout = null;
+      if (this.reloadTimeout) {
+        clearTimeout(this.reloadTimeout)
+        this.reloadTimeout = null
       }
     },
   })
