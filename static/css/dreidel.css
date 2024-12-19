@@ -1,0 +1,133 @@
+/* pyramid author : Selim Khemissi http://www.khemissi.com
+http://www.khemissi.com/examples/css3/010-3D-pyramid/
+*/
+.stage {
+  position:relative;
+  top: 300px;
+  width: 150px;
+  height: 320px;
+  margin:auto;
+  perspective:1200px;
+  perspective-origin:50% 50%;
+}
+
+.pyramid3d {
+  position:relative;
+  width:200px;
+  height:200px;
+  margin:0 auto;
+
+  transition: transform 1s ease-out;
+  transform-style: preserve-3d;
+  transform: rotateX(50deg) rotateY(0deg) rotate(45deg);
+}
+
+.triangle, .square {
+  transform-style:preserve-3d;
+  transform-origin: left top;
+  transition: transform 200ms ease-out;
+}
+
+.triangle {
+  width:0;
+  height:0;
+  background:none;
+}
+
+/* note that border dimension includes border set in '.side' CSS Class */
+
+.triangle:before {
+  content:"";
+  position: absolute;
+  height: 0;
+  width: 0;
+  border-style: solid;
+  /* border-color: rgba(50, 50, 50, 0.7) transparent transparent transparent; */
+  border-width: 176px 100px 0 100px;
+}
+
+.square {
+  position:absolute;
+  width: 200px;
+  height: 200px;
+  background: rgba(black, 0.5);
+  font-size:8em;
+  color:#fff;
+  text-align: center;
+  font-family: alef, arial;
+  font-weight: bold;
+  &.small {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.rect {
+  width: 20px;
+  height: 100px;
+  position: absolute;
+  background: rgba(black, 0.5);
+}
+
+/* note that translation includes border set in '.side' CSS Class */
+.side1 {
+  /* square */
+  transform: translatez(200px);
+  background:rgba(0, 0, 0, 0.7);
+  &.small {
+    transform: translatez(300px) translatex(90px) translatey(90px);
+  }
+}
+
+.side2 {
+  /* triangle */
+  transform: translatex(0) rotatey(-125deg) rotatez(90deg);
+  &.square {
+    background: rgba(black, 0.5);
+    transform: translatex(0) translatez(200px) rotatey(-90deg) rotatez(90deg);
+  }
+  &.rect { 
+    background:  rgba(20, 20, 20, 0.3);
+    transform: translatex(80px) translatey(50px) translatez(250px) rotatey(90deg) rotatez(90deg);
+  }
+}
+
+.side3 {
+  /* triangle */
+  transform: translatex(200px) rotatez(90deg) rotatex(-55deg);
+  &.square {
+    background: rgba(yellow, 0.5);
+    transform: translatex(200px) translatez(200px) translatey(200px) rotatez(-90deg) rotatex(-90deg);
+  }
+  &.rect { 
+    background:  rgba(20, 20, 20, 0.3);
+    transform: translatex(100px) translatez(250px) translatey(50px) rotatez(-90deg) rotatex(-90deg);
+  }
+}
+
+.side4 {
+  /* triangle */
+  transform: translatez(0) rotatex(-55deg);
+  &.square {
+    background: rgba(blue,0.5);
+    transform: translatez(200px) rotatex(-90deg) rotatey(-180deg) translatex(-200px);
+  }
+  &.rect {
+    transform: translatez(250px) translatey(40px) rotatex(90deg)  translatex(90px);
+  }
+}
+
+.side5 {
+  /* triangle */
+  transform: translatey(200px) rotatex(-125deg);
+  &.square {
+    background: rgba(red, 0.5);
+    transform: translatey(200px)  translatez(200px) rotatex(-90deg);
+  }
+  &.rect {
+    transform: translatey(60px) translatex(90px)  translatez(250px) rotatex(-90deg);
+  }
+}
+
+.side2:before, .side3:before { border-color: rgba(20, 20, 20, 0.3) transparent transparent transparent; }
+.side4:before, .side5:before{ border-color: rgba(40, 40, 40, 0.6) transparent transparent transparent; }
