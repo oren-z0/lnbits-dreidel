@@ -10,7 +10,7 @@
           </div>
           <div v-for="(balance, playerIndex) in gameState.balances" :key="playerIndex">
             <div class="row">
-              <div class="text-body1">
+              <div class="text-body2">
                 Player <span v-text="playerIndex + 1"></span>: <span v-text="balance / 1000 | formatSats"></span> sats
               </div>
             </div>
@@ -26,7 +26,7 @@
         </div>
         <div v-if="!isAnimating && lastGameState.state === 'playing'" class="q-mt-lg">
           <div class="row justify-center">
-            <div class="text-h3">
+            <div class="text-h4">
               <span v-text="titles[gameState.dreidel_result]"></span>
             </div>
           </div>
@@ -100,7 +100,7 @@
           case 2:
             return `Player ${this.lastGameState.current_player + 1} won half the jackpot.`;
           case 3:
-            return `Player ${this.lastGameState.current_player + 1} won must pay another time.`;
+            return `Player ${this.lastGameState.current_player + 1} lost - must pay again.`;
           default:
             return "";
         }
@@ -138,6 +138,7 @@
         }
         if (this.gameState.state === "playing" && this.gameState.current_player !== undefined) {
           this.isAnimating = true;
+          this.gameState.jackpot += responseData.paid_amount;
           await new Promise(resolve => setTimeout(resolve, responseData.rotate_seconds * 1000));
           this.isAnimating = false;
         }
