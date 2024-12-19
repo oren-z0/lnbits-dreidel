@@ -5,11 +5,11 @@
       <q-card-section class="q-pa-none">
         <h5 class="text-subtitle1 q-mt-none q-mb-sm">{{ dreidel.memo }}</h5>
         <div v-if="gameState.balances" class="q-mt-lg">
-          <div class="row justify-center">
-            <h5 class="text-subtitle1 q-mb-sm">Balances</h5>
+          <div class="row">
+            <span class="text-subtitle1">Balances</span>
           </div>
           <div v-for="(balance, playerIndex) in gameState.balances" :key="playerIndex">
-            <div class="row justify-center">
+            <div class="row">
               <div class="text-body1">
                 Player <span v-text="playerIndex + 1"></span>: <span v-text="balance / 1000 | formatSats"></span> sats
               </div>
@@ -24,14 +24,14 @@
         <div id="dreidel-container" class="q-mt-lg">
           Dreidel <span v-text="isAnimating ? 'is spinning' : 'is not spinning'"></span>
         </div>
-        <div v-if="!isAnimating && lastGameState.state === 'playing'" class="q-mt-lg">
+        <div v-if="!isAnimating && gameState.state === 'playing'" class="q-mt-lg">
           <div class="row justify-center">
             <div class="text-h2">
-              <span v-text="titles[lastGameState.dreidel_result]"></span>
+              <span v-text="titles[gameState.dreidel_result]"></span>
             </div>
           </div>
           <div class="row justify-center">
-            <div class="text-body1" v-text="dreidelDescription"></div>
+            <div class="text-body1" v-text="dreidelResultDescription"></div>
           </div>
         </div>
         <div v-if="!isAnimating && gameState.payment_request" class="q-mt-lg">
@@ -90,8 +90,8 @@
       void this.reloadGameState();
     },
     computed: {
-      dreidelDescription() {
-        switch (this.lastGameState.dreidel_result) {
+      dreidelResultDescription() {
+        switch (this.gameState.dreidel_result) {
           case 0:
             return `Player ${this.lastGameState.current_player + 1} won nothing.`;
           case 1:
@@ -103,11 +103,6 @@
           default:
             return "";
         }
-      },
-      amount: function () {
-        return this.dreidelAmount > this.userAmount
-          ? this.dreidelAmount
-          : this.userAmount
       },
     },
     filters: {
