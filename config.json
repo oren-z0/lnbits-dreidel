@@ -1,7 +1,7 @@
 {
   "name": "Dreidel",
-  "short_description": "Create dreidels for content",
+  "short_description": "Play the traditional dreidel game",
   "tile": "/dreidel/static/image/dreidel.png",
-  "contributors": ["eillarra"],
+  "contributors": ["oren-z0"],
   "min_lnbits_version": "0.12.5"
 }

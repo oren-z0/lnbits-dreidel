@@ -7,7 +7,7 @@ from fastapi.requests import Request
 from lnbits.core.models import User
 from lnbits.decorators import check_user_exists
 
-from . import dreidel_ext, dreidel_renderer
+from .extension import dreidel_ext, dreidel_renderer
 from .crud import get_dreidel
 
 

@@ -25,7 +25,7 @@ from lnbits.decorators import (
     require_admin_key,
 )
 
-from . import dreidel_ext
+from .extension import dreidel_ext
 from .crud import (
     create_dreidel,
     delete_dreidel,

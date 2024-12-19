@@ -3,7 +3,7 @@ from typing import List, Optional, Union
 
 from lnbits.helpers import urlsafe_short_hash
 
-from . import db
+from .extension import db
 from .models import CreateDreidel, Dreidel, UpdateDreidel, UpdateDreidelGameState
 
 
