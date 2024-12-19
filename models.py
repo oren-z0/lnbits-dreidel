@@ -10,7 +10,7 @@ class CreateDreidel(BaseModel):
     memo: str = Query(...)
     bet_amount: int = Query(..., ge=1)
     rotate_seconds: int = Query(..., ge=1)
-    players: int = Query(..., ge=1)
+    players: int = Query(..., ge=2)
 
 class UpdateDreidel(BaseModel):
     memo: str = Query(...)
