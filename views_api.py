@@ -10,9 +10,9 @@ from fastapi.exceptions import HTTPException
 from loguru import logger
 
 try:
-    from Cryptodome import Random
+    import Cryptodome.Random.random
     def dreidel_random():
-        return Random.random.randint(0, 3)
+        return Cryptodome.Random.random.randint(0, 3)
 except ImportError:
     def dreidel_random():
         return random.randint(0, 3)
