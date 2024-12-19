@@ -5,20 +5,19 @@
       <q-card-section class="q-pa-none">
         <h5 class="text-subtitle1 q-mt-none q-mb-sm">{{ dreidel.memo }}</h5>
         <div v-if="gameState.balances" class="q-mt-lg">
+          <div class="row justify-center">
+            <h5 class="text-subtitle1 q-mb-sm">Balances</h5>
+          </div>
           <div v-for="(balance, playerIndex) in gameState.balances" :key="playerIndex">
             <div class="row justify-center">
-              <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                <div class="text-h6">
-                  Player <span v-text="playerIndex + 1"></span> balance: <span v-text="balance / 1000 | formatSats"></span> sats
-                </div>
+              <div class="text-body1">
+                Player <span v-text="playerIndex + 1"></span>: <span v-text="balance / 1000 | formatSats"></span> sats
               </div>
             </div>
           </div>
           <div class="row justify-center">
-            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-              <div class="text-h6">
-                Jackpot: <span v-text="gameState.jackpot / 1000 | formatSats"></span> sats
-              </div>
+            <div class="text-body1 text-bold">
+              Jackpot: <span v-text="gameState.jackpot / 1000 | formatSats"></span> sats
             </div>
           </div>
         </div>
@@ -27,27 +26,21 @@
         </div>
         <div v-if="!isAnimating && lastGameState.state === 'playing'" class="q-mt-lg">
           <div class="row justify-center">
-            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-              <div class="text-h2">
-                <span v-text="titles[lastGameState.dreidel_result]"></span>
-              </div>
+            <div class="text-h2">
+              <span v-text="titles[lastGameState.dreidel_result]"></span>
             </div>
           </div>
           <div class="row justify-center">
-            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-              <div class="text-h6" v-text="dreidelDescription"></div>
-            </div>
+            <div class="text-body1" v-text="dreidelDescription"></div>
           </div>
         </div>
         <div v-if="!isAnimating && gameState.payment_request" class="q-mt-lg">
-          <div class="row justify-center">
-            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-              <div class="text-h6">
-                Player <span v-text="gameState.current_player + 1"></span> please pay the invoice
-                <span v-if="gameState.state === 'initial_funding'">to join the game.</span>
-                <span v-else-if="gameState.state === 'playing'">to spin the dreidel.</span>
-                <span v-else-if="gameState.state === 'shtel'">to continue.</span>
-              </div>
+          <div class="row justify-center q-mb-sm">
+            <div class="text-body1">
+              Player <span v-text="gameState.current_player + 1"></span> please pay the invoice
+              <span v-if="gameState.state === 'initial_funding'">to join the game.</span>
+              <span v-else-if="gameState.state === 'playing'">to spin the dreidel.</span>
+              <span v-else-if="gameState.state === 'shtel'">to continue.</span>
             </div>
           </div>
           <a class="text-secondary" :href="'lightning:' + gameState.payment_request">
