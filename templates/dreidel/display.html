@@ -173,7 +173,7 @@
           this.dreidelAngle = initialAngle + ((4 - responseData.dreidel_result) * 90) + (Math.floor((this.dreidelAngle - initialAngle) / 360) + responseData.rotate_seconds) * 360
           await new Promise(resolve => setTimeout(resolve, responseData.rotate_seconds * 1000))
           this.isAnimating = false
-        } else if (this.gameState.state === "shtel") {
+        } else if (this.gameState.state === "loading" && responseData.state === "shtel") {
           this.dreidelTimeoutSeconds = 0
           this.dreidelAngle = 360 // initlalAngle + (4 - 3) * 90
         }
