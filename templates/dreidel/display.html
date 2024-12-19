@@ -24,9 +24,9 @@
         <div id="dreidel-container" class="q-mt-lg">
           Dreidel <span v-text="isAnimating ? 'is spinning' : 'is not spinning'"></span>
         </div>
-        <div v-if="!isAnimating && gameState.state === 'playing'" class="q-mt-lg">
+        <div v-if="!isAnimating && lastGameState.state === 'playing'" class="q-mt-lg">
           <div class="row justify-center">
-            <div class="text-h2">
+            <div class="text-h3">
               <span v-text="titles[gameState.dreidel_result]"></span>
             </div>
           </div>
