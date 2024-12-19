@@ -18,7 +18,12 @@
           </div>
           <div class="row justify-center q-mt-md">
             <div class="text-body1 text-bold">
-              Jackpot: <span v-text="gameState.jackpot / 1000 | formatSats"></span> sats
+              <span v-if="gameState.state === 'funding'">
+                Funding Round (<span v-text="gameState.jackpot / 1000 | formatSats"></span> sats accumulated so far)
+              </span>
+              <span v-else>
+                Jackpot: <span v-text="gameState.jackpot / 1000 | formatSats"></span> sats
+              </span>
             </div>
           </div>
         </div>
@@ -54,9 +59,9 @@
           <div class="row justify-center">
             <div class="text-body1">
               Player <span v-text="gameState.current_player + 1"></span> please pay the invoice
-              <span v-if="gameState.state === 'initial_funding'">to join the game.</span>
-              <span v-else-if="gameState.state === 'playing'">to spin the dreidel.</span>
-              <span v-else-if="gameState.state === 'shtel'">to continue.</span>
+              <span v-if="gameState.state === 'funding'"> to subsidize the funding round.</span>
+              <span v-else-if="gameState.state === 'playing'"> to spin the dreidel.</span>
+              <span v-else-if="gameState.state === 'shtel'"> to continue.</span>
             </div>
           </div>
           <div class="row justify-center q-my-md">

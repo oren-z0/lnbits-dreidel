@@ -102,9 +102,10 @@ async def api_dreidel_game_state(dreidel_id: str):
     game_state = json.loads(dreidel.game_state)
     paid_amount_msats = await _get_amount_paid(dreidel)
     if game_state["state"] == "initial":
-        game_state["state"] = "initial_funding"
+        game_state["state"] = "funding"
         game_state["balances"] = [0] * dreidel.players
         game_state["current_player"] = 0
+        game_state["last_funding_player"] = dreidel.players - 1
         game_state["jackpot"] = 0
         payment_hash, payment_request = await _create_dreidel_invoice(dreidel)
         game_state["payment_request"] = payment_request
@@ -113,10 +114,10 @@ async def api_dreidel_game_state(dreidel_id: str):
     elif paid_amount_msats > 0:
         game_state["jackpot"] += paid_amount_msats
         game_state["paid_amount"] = paid_amount_msats
-        if game_state["state"] == "initial_funding":
-            game_state["current_player"] = (game_state["current_player"] + 1) % dreidel.players
-            if game_state["current_player"] == 0:
+        if game_state["state"] == "funding":
+            if game_state["current_player"] == game_state["last_funding_player"]:
                 game_state["state"] = "playing"
+            game_state["current_player"] = (game_state["current_player"] + 1) % dreidel.players
         elif game_state["state"] == "playing":
             game_state["dreidel_result"] = dreidel_random()
             if game_state["dreidel_result"] == 0: # Nisht
@@ -124,11 +125,16 @@ async def api_dreidel_game_state(dreidel_id: str):
             elif game_state["dreidel_result"] == 1: # Gantz
                 game_state["balances"][game_state["current_player"]] += game_state["jackpot"]
                 game_state["jackpot"] = 0
-                game_state["current_player"] = (game_state["current_player"] + 1) % dreidel.players
+                game_state["state"] = "funding"
+                game_state["last_funding_player"] = game_state["current_player"]
+                game_state["current_player"] = (game_state["current_player"] + 1) % dreidel.players 
             elif game_state["dreidel_result"] == 2: # Halb
-                halve_amount = game_state["jackpot"] // 2
+                halve_amount = (game_state["jackpot"] + 1) // 2
                 game_state["balances"][game_state["current_player"]] += halve_amount
                 game_state["jackpot"] -= halve_amount
+                if game_state["jackpot"] == 0:
+                    game_state["state"] = "funding"
+                    game_state["last_funding_player"] = game_state["current_player"]
                 game_state["current_player"] = (game_state["current_player"] + 1) % dreidel.players
             elif game_state["dreidel_result"] == 3: # Shtel
                 game_state["state"] = "shtel"
