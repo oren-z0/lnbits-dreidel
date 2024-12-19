@@ -54,6 +54,7 @@ async def update_dreidel(id: str, wallet_id: str, data: UpdateDreidel) -> Dreide
     assert dreidel, "Updated dreidel couldn't be retrieved"
     return dreidel
 
+
 async def update_dreidel_game_state(id: str, wallet_id: str, game_state: dict, payment_hash: str) -> Dreidel:
     await db.execute(
         """
@@ -68,6 +69,7 @@ async def update_dreidel_game_state(id: str, wallet_id: str, game_state: dict, p
     dreidel = await get_dreidel(id)
     assert dreidel, "Updated dreidel couldn't be retrieved"
     return dreidel
+
 
 async def get_dreidel(dreidel_id: str) -> Optional[Dreidel]:
     row = await db.fetchone(
