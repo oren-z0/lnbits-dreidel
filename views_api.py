@@ -25,15 +25,16 @@ from lnbits.decorators import (
     require_admin_key,
 )
 
-from . import dreidel_ext, paid_invoices
+from . import dreidel_ext
 from .crud import (
     create_dreidel,
     delete_dreidel,
     get_dreidel,
     get_dreidels,
     update_dreidel,
+    update_dreidel_game_state,
 )
-from .models import CheckDreidelInvoice, CreateDreidel, UpdateDreidel, CreateDreidelInvoice, Dreidel
+from .models import CreateDreidel, UpdateDreidel, Dreidel
 
 
 @dreidel_ext.get("/api/v1/dreidels")
@@ -140,18 +141,6 @@ async def api_dreidel_game_state(dreidel_id: str):
     game_state["rotate_seconds"] = dreidel.rotate_seconds
     game_state["ok"] = True
     return dreidel.game_state
-
-@dreidel_ext.post("/api/v1/dreidels/invoice/{dreidel_id}")
-async def api_dreidel_create_invoice(data: CreateDreidelInvoice, dreidel_id: str):
-    try:
-        dreidel = await get_dreidel(dreidel_id)
-        assert dreidel, "Dreidel not found"
-        payment_hash, payment_request = await _create_dreidel_invoice(dreidel)
-        return {"payment_hash": payment_hash, "payment_request": payment_request}
-    except AssertionError as e:
-        raise HTTPException(HTTPStatus.BAD_REQUEST, str(e))
-    except Exception as e:
-        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
 
 async def _create_dreidel_invoice(dreidel: Dreidel):
     return await create_invoice(

@@ -21,14 +21,6 @@ class UpdateDreidelGameState(BaseModel):
     game_state: str = Query(...)
     payment_hash: str = Query(...)
 
-class CreateDreidelInvoice(BaseModel):
-    bet_amount: int = Query(..., ge=1)
-
-
-class CheckDreidelInvoice(BaseModel):
-    payment_hash: str = Query(...)
-
-
 class Dreidel(BaseModel):
     id: str
     wallet: str
