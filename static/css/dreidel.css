@@ -9,8 +9,8 @@
 }
 .pyramid3d {
   position: relative;
-  width: 200px;
-  height: 200px;
+  width: 150px;
+  height: 150px;
   margin: 0 auto;
   transform-style: preserve-3d;
 }
@@ -31,14 +31,13 @@
   height: 0;
   width: 0;
   border-style: solid;
- /* border-color: rgba(50, 50, 50, 0.7) transparent transparent transparent;
-  */
-  border-width: 176px 100px 0 100px;
+  /* border-color: rgba(50, 50, 50, 0.7) transparent transparent transparent; */
+  border-width: 132px 75px 0 75px;
 }
 .square {
   position: absolute;
-  width: 200px;
-  height: 200px;
+  width: 150px;
+  height: 150px;
   background: rgba(0, 0, 0, 0.5);
   font-size: 8em;
   color: #fff;
@@ -47,23 +46,23 @@
   font-weight: bold;
 }
 .square.small {
-  width: 20px;
-  height: 20px;
+  width: 15px;
+  height: 15px;
 }
 .rect {
-  width: 20px;
-  height: 100px;
+  width: 15px;
+  height: 75px;
   position: absolute;
   background: rgba(0, 0, 0, 0.5);
 }
 /* note that translation includes border set in '.side' CSS Class */
 .side1 {
  /* square */
-  transform: translatez(200px);
+  transform: translatez(150px);
   background: rgba(0, 0, 0, 0.7);
 }
 .side1.small {
-  transform: translatez(300px) translatex(90px) translatey(90px);
+  transform: translatez(225px) translatex(67.5px) translatey(67.5px);
 }
 .side2 {
  /* triangle */
@@ -71,23 +70,23 @@
 }
 .side2.square {
   background: rgba(0, 180, 0, 0.9);
-  transform: translatex(0) translatez(200px) rotatey(-90deg) rotatez(90deg);
+  transform: translatex(0) translatez(150px) rotatey(-90deg) rotatez(90deg);
 }
 .side2.rect {
   background: rgba(20, 20, 20, 0.3);
-  transform: translatex(80px) translatey(50px) translatez(250px) rotatey(90deg) rotatez(90deg);
+  transform: translatex(60px) translatey(37.5px) translatez(187.5px) rotatey(90deg) rotatez(90deg);
 }
 .side3 {
  /* triangle */
-  transform: translatex(200px) rotatez(90deg) rotatex(-55deg);
+  transform: translatex(150px) rotatez(90deg) rotatex(-55deg);
 }
 .side3.square {
   background: rgba(190, 170, 0, 0.9);
-  transform: translatex(200px) translatez(200px) translatey(200px) rotatez(-90deg) rotatex(-90deg);
+  transform: translatex(150px) translatez(150px) translatey(150px) rotatez(-90deg) rotatex(-90deg);
 }
 .side3.rect {
   background: rgba(20, 20, 20, 0.3);
-  transform: translatex(100px) translatez(250px) translatey(50px) rotatez(-90deg) rotatex(-90deg);
+  transform: translatex(75px) translatez(187.5px) translatey(37.5px) rotatez(-90deg) rotatex(-90deg);
 }
 .side4 {
  /* triangle */
@@ -95,21 +94,21 @@
 }
 .side4.square {
   background: rgba(0, 0, 255, 0.9);
-  transform: translatez(200px) rotatex(-90deg) rotatey(-180deg) translatex(-200px);
+  transform: translatez(150px) rotatex(-90deg) rotatey(-180deg) translatex(-150px);
 }
 .side4.rect {
-  transform: translatez(250px) translatey(40px) rotatex(90deg) translatex(90px);
+  transform: translatez(187.5px) translatey(30px) rotatex(90deg) translatex(67.5px);
 }
 .side5 {
  /* triangle */
-  transform: translatey(200px) rotatex(-125deg);
+  transform: translatey(150px) rotatex(-125deg);
 }
 .side5.square {
   background: rgba(255, 0, 0, 0.9);
-  transform: translatey(200px) translatez(200px) rotatex(-90deg);
+  transform: translatey(150px) translatez(150px) rotatex(-90deg);
 }
 .side5.rect {
-  transform: translatey(60px) translatex(90px) translatez(250px) rotatex(-90deg);
+  transform: translatey(45px) translatex(67.5px) translatez(187.5px) rotatex(-90deg);
 }
 .side2:before, .side3:before {
   border-color: rgba(20, 20, 20, 0.3) transparent transparent transparent;
