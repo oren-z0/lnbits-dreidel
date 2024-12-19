@@ -2,6 +2,6 @@
   "name": "Dreidel",
   "short_description": "Play the traditional dreidel game",
   "tile": "/dreidel/static/image/dreidel.png",
-  "contributors": ["oren-z0"],
+  "contributors": ["oren-z0", "eillarra"],
   "min_lnbits_version": "0.12.5"
 }
