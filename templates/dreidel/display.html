@@ -112,10 +112,12 @@
     },
     methods: {
       async reloadGameState() {
-        let response;
+        let responseData;
         try {
-          response = await LNbits.api.request('GET', '/dreidel/api/v1/dreidels/{{ dreidel.id }}/state', 'filler');
-          if (!response.data.ok) {
+          // Not using LNbits.api.request because the loading bar is annoying.
+          const response = await fetch('/dreidel/api/v1/dreidels/{{ dreidel.id }}/state');
+          responseData = await response.json();
+          if (!responseData.ok) {
             throw new Error("Bad response");
           }
         } catch (error) {
@@ -123,17 +125,17 @@
           setTimeout(this.reloadGameState, 5000);
           return;
         }
-        if (response.data.updated_at === this.gameState.updated_at) {
+        if (responseData.updated_at === this.gameState.updated_at) {
           setTimeout(this.reloadGameState, 2000);
           return;
         }
         if (this.gameState.state === "playing" && this.gameState.current_player !== undefined) {
           this.isAnimating = true;
-          await new Promise(resolve => setTimeout(resolve, response.data.rotate_seconds * 1000));
+          await new Promise(resolve => setTimeout(resolve, responseData.rotate_seconds * 1000));
           this.isAnimating = false;
         }
         this.lastGameState = this.gameState;
-        this.gameState = response.data;
+        this.gameState = responseData;
         setTimeout(this.reloadGameState, 2000);
       },
     },
