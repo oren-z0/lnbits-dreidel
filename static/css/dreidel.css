@@ -70,7 +70,7 @@
   transform: translatex(0) rotatey(-125deg) rotatez(90deg);
 }
 .side2.square {
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 180, 0, 0.9);
   transform: translatex(0) translatez(200px) rotatey(-90deg) rotatez(90deg);
 }
 .side2.rect {
@@ -82,7 +82,7 @@
   transform: translatex(200px) rotatez(90deg) rotatex(-55deg);
 }
 .side3.square {
-  background: rgba(255, 255, 0, 0.5);
+  background: rgba(190, 170, 0, 0.9);
   transform: translatex(200px) translatez(200px) translatey(200px) rotatez(-90deg) rotatex(-90deg);
 }
 .side3.rect {
@@ -94,7 +94,7 @@
   transform: translatez(0) rotatex(-55deg);
 }
 .side4.square {
-  background: rgba(0, 0, 255, 0.5);
+  background: rgba(0, 0, 255, 0.9);
   transform: translatez(200px) rotatex(-90deg) rotatey(-180deg) translatex(-200px);
 }
 .side4.rect {
@@ -105,7 +105,7 @@
   transform: translatey(200px) rotatex(-125deg);
 }
 .side5.square {
-  background: rgba(255, 0, 0, 0.5);
+  background: rgba(255, 0, 0, 0.9);
   transform: translatey(200px) translatez(200px) rotatex(-90deg);
 }
 .side5.rect {
