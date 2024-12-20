@@ -7,10 +7,10 @@ from pydantic import BaseModel
 
 
 class CreateDreidel(BaseModel):
-    memo: str = Query(...)
+    memo: str = Query(..., max_length=100)
     bet_amount: int = Query(..., ge=1)
-    rotate_seconds: int = Query(..., ge=1)
-    players: int = Query(..., ge=2)
+    rotate_seconds: int = Query(..., ge=1, le=600)
+    players: int = Query(..., ge=2, le=50)
 
 class UpdateDreidel(BaseModel):
     memo: str = Query(...)
