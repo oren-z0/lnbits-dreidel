@@ -161,10 +161,13 @@
         let responseData
         try {
           // Not using LNbits.api.request because the loading bar is annoying.
-          const response = await fetch('/dreidel/api/v1/dreidels/{{ dreidel.id }}/state')
+          const response = await fetch('{{ url_for("api_dreidel_game_state", dreidel_id=dreidel.id) }}')
+          if (!response.ok) {
+            throw new Error("Bad response status")
+          }
           responseData = await response.json()
           if (!responseData.ok) {
-            throw new Error("Bad response")
+            throw new Error("Bad response content")
           }
         } catch (error) {
           LNbits.utils.notifyApiError(error)
