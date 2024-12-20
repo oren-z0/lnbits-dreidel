@@ -127,9 +127,10 @@
         <q-input
           filled
           dense
-          v-model.number="formDialog.data.rotate_seconds"
+          v-model.number="formDialog.data.spin_seconds"
           type="number"
-          label="Rotation seconds *"
+          label="Spin seconds *"
+          hint="Time for the dreidel spin animation"
         ></q-input>
         <q-input
           v-if="!formDialog.data.id"
@@ -201,8 +202,8 @@
         return (
           this.formDialog.data.bet_amount &&
           this.formDialog.data.bet_amount >= 1 &&
-          this.formDialog.data.rotate_seconds &&
-          this.formDialog.data.rotate_seconds >= 1 &&
+          this.formDialog.data.spin_seconds &&
+          this.formDialog.data.spin_seconds >= 1 &&
           (this.formDialog.data.id ||
             (this.formDialog.data.players &&
               this.formDialog.data.players >= 2)) &&
@@ -214,7 +215,7 @@
       emptyDreidel: function () {
         return {
           bet_amount: 10,
-          rotate_seconds: 10,
+          spin_seconds: 10,
         }
       },
       getDreidels: function () {
@@ -241,7 +242,7 @@
           const dreidel = {
             memo: this.formDialog.data.memo,
             bet_amount: this.formDialog.data.bet_amount,
-            rotate_seconds: this.formDialog.data.rotate_seconds,
+            spin_seconds: this.formDialog.data.spin_seconds,
             ...!dreidelId && {
               players: this.formDialog.data.players,
             },

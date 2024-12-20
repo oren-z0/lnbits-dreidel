@@ -9,13 +9,13 @@ from pydantic import BaseModel
 class CreateDreidel(BaseModel):
     memo: str = Query(..., max_length=100)
     bet_amount: int = Query(..., ge=1)
-    rotate_seconds: int = Query(..., ge=1, le=600)
+    spin_seconds: int = Query(..., ge=1, le=600)
     players: int = Query(..., ge=2, le=50)
 
 class UpdateDreidel(BaseModel):
     memo: str = Query(...)
     bet_amount: int = Query(..., ge=1)
-    rotate_seconds: int = Query(..., ge=1)
+    spin_seconds: int = Query(..., ge=1)
 
 class UpdateDreidelGameState(BaseModel):
     game_state: str = Query(...)
@@ -26,7 +26,7 @@ class Dreidel(BaseModel):
     wallet: str
     memo: str
     bet_amount: int
-    rotate_seconds: int
+    spin_seconds: int
     players: int
     game_state: str
     payment_hash: str
