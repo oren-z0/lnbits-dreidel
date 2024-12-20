@@ -12,17 +12,17 @@
           <div class="row">
             <div v-for="(balance, playerIndex) in gameState.balances" :key="playerIndex" class="col-6 col-md-4">
               <span class="text-body2" :class="{'text-bold': gameState.current_player === playerIndex}">
-                Player <span v-text="playerIndex + 1"></span>: <span v-text="balance / 1000 | formatSats"></span> sats
+                Player <span v-text="playerIndex + 1"></span>: <span v-text="balance | formatMSatsAsSats"></span> sats
               </span>
             </div>
           </div>
           <div class="row justify-center q-mt-md">
             <div class="text-body1 text-bold">
               <span v-if="gameState.state === 'funding'">
-                Funding Round (<span v-text="gameState.jackpot / 1000 | formatSats"></span> sats accumulated so far)
+                Funding Round (<span v-text="gameState.jackpot | formatMSatsAsSats"></span> sats accumulated so far)
               </span>
               <span v-else>
-                Jackpot: <span v-text="gameState.jackpot / 1000 | formatSats"></span> sats
+                Jackpot: <span v-text="gameState.jackpot | formatMSatsAsSats"></span> sats
               </span>
             </div>
           </div>
@@ -146,8 +146,8 @@
       },
     },
     filters: {
-      formatSats(value) {
-        return new Intl.NumberFormat('en-US', { maximumFractionDigits: 3}).format(value)
+      formatMSatsAsSats(value) {
+        return new Intl.NumberFormat('en-US', { maximumFractionDigits: 3}).format(value / 1000)
       }
     },
     methods: {
