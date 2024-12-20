@@ -137,7 +137,13 @@ async def api_dreidel_game_state(dreidel_id: str):
                     game_state["last_funding_player"] = game_state["current_player"]
                 game_state["current_player"] = (game_state["current_player"] + 1) % dreidel.players
             elif game_state["dreidel_result"] == 3: # Shtel
-                game_state["state"] = "shtel"
+                bet_amount_msats = dreidel.bet_amount * 1000
+                if game_state["balances"][game_state["current_player"]] < bet_amount_msats:
+                    game_state["state"] = "shtel"
+                else:
+                    game_state["balances"][game_state["current_player"]] -= bet_amount_msats
+                    game_state["jackpot"] += bet_amount_msats
+                    game_state["current_player"] = (game_state["current_player"] + 1) % dreidel.players
         elif game_state["state"] == "shtel":
             game_state["state"] = "playing"
             game_state["current_player"] = (game_state["current_player"] + 1) % dreidel.players

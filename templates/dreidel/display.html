@@ -129,7 +129,11 @@
           case 2:
             return `Player ${this.lastGameState.current_player + 1} won half the jackpot.`
           case 3:
-            return `Player ${this.lastGameState.current_player + 1} lost - must pay again.`
+            if (this.gameState.state === "shtel") {
+              return `Player ${this.lastGameState.current_player + 1} lost - must pay again.`
+            } else {
+              return `Player ${this.lastGameState.current_player + 1} lost - paid again from balance.`
+            }
           default:
             return ""
         }
