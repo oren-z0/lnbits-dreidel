@@ -55,20 +55,18 @@ async def update_dreidel(id: str, wallet_id: str, data: UpdateDreidel) -> Dreide
     return dreidel
 
 
-async def update_dreidel_game_state(id: str, wallet_id: str, game_state: dict, payment_hash: str) -> Dreidel:
-    await db.execute(
+async def update_dreidel_game_state(dreidel: Dreidel, wallet_id: str, game_state: dict, payment_hash: str):
+    cursor = await db.execute(
         """
         UPDATE dreidel.dreidels
         SET (game_state, payment_hash) =
         (?, ?)
-        WHERE id = ? AND wallet = ?
+        WHERE id = ? AND wallet = ? AND game_state = ?
         """,
-        (json.dumps(game_state), payment_hash, id, wallet_id),
+        (json.dumps(game_state), payment_hash, dreidel.id, wallet_id, dreidel.game_state),
     )
-
-    dreidel = await get_dreidel(id)
-    assert dreidel, "Updated dreidel couldn't be retrieved"
-    return dreidel
+    if cursor.rowcount != 1:
+        raise Exception("Failed to update dreidel game state")
 
 
 async def get_dreidel(dreidel_id: str) -> Optional[Dreidel]:

@@ -110,7 +110,7 @@ async def api_dreidel_game_state(dreidel_id: str):
         payment_hash, payment_request = await _create_dreidel_invoice(dreidel)
         game_state["payment_request"] = payment_request
         game_state["updated_at"] = time()
-        await update_dreidel_game_state(dreidel_id, dreidel.wallet, game_state, payment_hash)
+        await update_dreidel_game_state(dreidel, dreidel.wallet, game_state, payment_hash)
     elif paid_amount_msats > 0:
         game_state["jackpot"] += paid_amount_msats
         game_state["paid_amount"] = paid_amount_msats
@@ -150,7 +150,7 @@ async def api_dreidel_game_state(dreidel_id: str):
         payment_hash, payment_request = await _create_dreidel_invoice(dreidel)
         game_state["payment_request"] = payment_request
         game_state["updated_at"] = time()
-        await update_dreidel_game_state(dreidel_id, dreidel.wallet, game_state, payment_hash)
+        await update_dreidel_game_state(dreidel, dreidel.wallet, game_state, payment_hash)
     game_state["spin_seconds"] = dreidel.spin_seconds
     game_state["ok"] = True
     return game_state
