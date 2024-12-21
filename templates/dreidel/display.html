@@ -248,9 +248,7 @@
       },
       async endGame() {
         try {
-          await LNbits.api.request("POST", '{{ url_for("api_dreidel_end", dreidel_id=dreidel.id) }}', {
-            id: this.dreidel.id,
-            });
+          await LNbits.api.request("POST", '{{ url_for("api_dreidel_end", dreidel_id=dreidel.id) }}');
         } catch (error) {
           LNbits.utils.notifyApiError(error)
         }
