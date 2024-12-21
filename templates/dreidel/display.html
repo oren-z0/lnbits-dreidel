@@ -248,12 +248,16 @@
         this.gameState = responseData
         this.resetReloadTimeout(this.reloadGameState, 2000)
       },
-    },
-    async endGame() {
-      await LNbits.api.request("POST", '{{ url_for("api_dreidel_end", dreidel_id=dreidel.id) }}', {
-        id: this.dreidel.id,
-      });
-      this.resetReloadTimeout(this.reloadGameState, 1)
+      async endGame() {
+        try {
+          await LNbits.api.request("POST", '{{ url_for("api_dreidel_end", dreidel_id=dreidel.id) }}', {
+            id: this.dreidel.id,
+            });
+        } catch (error) {
+          LNbits.utils.notifyApiError(error)
+        }
+        this.resetReloadTimeout(this.reloadGameState, 1)
+      },
     },
     beforeDestroy() {
       if (this.reloadTimeout) {
