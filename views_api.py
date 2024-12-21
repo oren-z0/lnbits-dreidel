@@ -270,6 +270,7 @@ async def api_dreidels_withdraw(req: Request, k1: str, pr: str | None = None):
             return {"status": "ERROR", "reason": "Withdraw already being processed."}
         game_state["locked"] = True
         try:
+            game_state["updated_at"] = time()
             await update_dreidel_game_state(dreidel, dreidel.wallet, game_state, "")
             dreidel = await get_dreidel(dreidel_id)
             if not dreidel:
@@ -289,6 +290,7 @@ async def api_dreidels_withdraw(req: Request, k1: str, pr: str | None = None):
             return {"status": "ERROR", "reason": "Failed to pay invoice."}
         finally:
             game_state["locked"] = False
+            game_state["updated_at"] = time()
             try:
                 await update_dreidel_game_state(dreidel, dreidel.wallet, game_state, "")
             except:
