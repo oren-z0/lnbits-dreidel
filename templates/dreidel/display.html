@@ -21,6 +21,9 @@
               <span v-if="gameState.state === 'funding'">
                 Funding Round (<span v-text="gameState.jackpot | formatMSatsAsSats"></span> sats accumulated so far)
               </span>
+              <span v-else-if="gameState.state === 'ended'">
+                Game Ended
+              </span>
               <span v-else>
                 Jackpot: <span v-text="gameState.jackpot | formatMSatsAsSats"></span> sats
               </span>
@@ -55,7 +58,7 @@
             <div class="text-body1" v-text="dreidelResultDescription"></div>
           </div>
         </div>
-        <div v-if="!isAnimating && gameState.payment_request" class="q-mt-md">
+        <div v-if="!isAnimating && gameState.payment_request && gameState.state !== 'ended'" class="q-mt-md">
           <div class="row justify-center">
             <div class="text-body1">
               Player <span v-text="gameState.current_player + 1"></span> please pay the invoice
@@ -81,6 +84,51 @@
             <q-btn outline color="grey" @click="copyText(gameState.payment_request)">
               Copy invoice
             </q-btn>
+            <q-btn outline color="red" @click="endGame()">
+              End game and withdraw prizes
+            </q-btn>
+          </div>
+        </div>
+        <div v-else-if="gameState.state === 'ended'" class="q-mt-md">
+          <div class="row justify-center">
+            <div class="text-subtitle1">
+              Select a player to withdraw prizes from.
+            </div>
+          </div>
+          <div class="row justify-center">
+            <div v-for="(_withdrawLink, playerIndex) in gameState.withdraw_links" :key="playerIndex" class="col-3">
+              <q-btn flat no-caps padding="none" @click="withdrawPlayerIndex = playerIndex">
+                Player <span v-text="playerIndex + 1"></span>
+              </q-btn>
+            </div>
+          </div>
+          <div v-if="withdrawLink !== null">
+            <div v-if="withdrawLink.status === 'too_small'" class="text-body1" >
+              Prize is too small to be withdrawn.
+            </div>
+            <div v-else-if="withdrawLink.status === 'paid'" class="text-body1">
+              Prize has been paid out.
+            </div>
+            <div v-else-if="withdrawLink.status === 'pending'">
+              <div class="row justify-center q-my-md">
+                <div class="col-10 col-md-8 col-lg-6 col-xl-6">
+                  <a class="text-secondary" :href="'lightning:' + withdrawLink.lnurl">
+                    <q-responsive :ratio="1" class="q-mb-md">
+                      <qrcode
+                      :value="'lightning:' + withdrawLink.lnurl.toUpperCase()"
+                      :options="{width: 800}"
+                      class="rounded-borders"
+                      ></qrcode>
+                    </q-responsive>
+                  </a>
+                </div>
+              </div>
+              <div class="row justify-center">
+                <q-btn outline color="grey" @click="copyText(withdrawLink.lnurl)">
+                  Copy LNURL
+                </q-btn>
+              </div>
+            </div>
           </div>
         </div>
       </q-card-section>
@@ -114,12 +162,19 @@
           state: "loading",
         },
         reloadTimeout: null,
+        withdrawPlayerIndex: null,
       }
     },
     mounted() {
       void this.reloadGameState()
     },
     computed: {
+      withdrawLink() {
+        if (!this.gameState.withdraw_links || this.withdrawPlayerIndex === null) {
+          return undefined
+        }
+        return this.gameState.withdraw_links[this.withdrawPlayerIndex]
+      },
       dreidelResultDescription() {
         switch (this.gameState.dreidel_result) {
           case 0:
@@ -193,6 +248,12 @@
         this.gameState = responseData
         this.resetReloadTimeout(this.reloadGameState, 2000)
       },
+    },
+    async endGame() {
+      await LNbits.api.request("POST", '{{ url_for("api_dreidel_end", dreidel_id=dreidel.id) }}', {
+        id: this.dreidel.id,
+      });
+      this.resetReloadTimeout(this.reloadGameState, 1)
     },
     beforeDestroy() {
       if (this.reloadTimeout) {
