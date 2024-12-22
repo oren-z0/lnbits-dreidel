@@ -110,6 +110,7 @@ async def api_dreidel_game_state(dreidel_id: str):
         game_state["balances"] = [0] * dreidel.players
         game_state["current_player"] = 0
         game_state["funding_players"] = list(range(dreidel.players))
+        game_state["after_funding_player"] = 0
         game_state["jackpot"] = 0
         payment_hash, payment_request = await _create_dreidel_invoice(dreidel)
         game_state["payment_request"] = payment_request
@@ -126,7 +127,7 @@ async def api_dreidel_game_state(dreidel_id: str):
                 game_state["current_player"] = game_state["funding_players"][0]
             else:
                 game_state["state"] = "playing"
-                game_state["current_player"] = (game_state["current_player"] + 1) % dreidel.players
+                game_state["current_player"] = game_state["after_funding_player"]
         elif game_state["state"] == "playing":
             game_state["dreidel_result"] = dreidel_random()
             if game_state["dreidel_result"] == 0: # Nisht
@@ -153,6 +154,7 @@ async def api_dreidel_game_state(dreidel_id: str):
                     (game_state["current_player"] + index) % dreidel.players
                     for index in range(dreidel.players)
                 ]
+                game_state["after_funding_player"] = game_state["current_player"]
                 can_fund_players = [player_index for player_index in game_state["funding_players"] if game_state["balances"][player_index] > bet_amount_msats]
                 if len(can_fund_players) > 0:
                     game_state["temporary_state"] = json.loads(json.dumps(game_state))
@@ -164,6 +166,7 @@ async def api_dreidel_game_state(dreidel_id: str):
                         game_state["current_player"] = game_state["funding_players"][0]
                     else:
                         game_state["state"] = "playing"
+                        # current_player is already set to after_funding_player
         elif game_state["state"] == "shtel":
             game_state["state"] = "playing"
             game_state["current_player"] = (game_state["current_player"] + 1) % dreidel.players
