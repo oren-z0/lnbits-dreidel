@@ -270,9 +270,12 @@ async def api_dreidels_withdraw(req: Request, k1: str, pr: str | None = None):
             return {"status": "ERROR", "reason": "Already withdrawn."}
         amount_sats = withdraw_link["amount_sats"]
         if not pr:
+            api_dreidels_withdraw_url = req.url_for("api_dreidels_withdraw")
+            scheme = "http" if api_dreidels_withdraw_url.hostname.endswith(".onion") else "https"
+            api_dreidels_withdraw_url = api_dreidels_withdraw_url.replace(scheme=scheme)
             return {
                 "tag": "withdrawRequest",
-                "callback": req.url_for("api_dreidels_withdraw"), # same endpoint
+                "callback": str(api_dreidels_withdraw_url), # same endpoint
                 "k1": k1,
                 "maxWithdrawable": amount_sats * 1000,
                 "minWithdrawable": amount_sats * 1000,
