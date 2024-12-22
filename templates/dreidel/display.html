@@ -166,7 +166,6 @@
         balances: null,
         jackpot: null,
         balanceUpdateInterval: null,
-        showMillisats: true,
       }
     },
     mounted() {
@@ -221,31 +220,45 @@
           deltaBalances = undefined
         }
         const deltaJackpot = (this.gameState.jackpot - this.jackpot) / 40
+
+        let exactBalances = this.balances.slice()
+        let exactJackpot = this.jackpot
+
         let count = 0
-        this.showMillisats = false
         this.balanceUpdateInterval = setInterval(() => {
           if (count < 40) {
             if (deltaBalances) {
               for (let i = 0; i < this.balances.length; i++) {
-                this.balances[i] += deltaBalances[i]
+                if (deltaBalances[i] === 0) {
+                  continue
+                }
+                exactBalances[i] += deltaBalances[i]
+                if (deltaBalances[i] > 0) {
+                  this.balances[i] = Math.min(Math.ceil(exactBalances[i] / 1000) * 1000, this.gameState.balances[i])
+                } else {
+                  this.balances[i] = Math.max(Math.floor(exactBalances[i] / 1000) * 1000, this.gameState.balances[i])
+                }
               }
             }
-            this.jackpot += deltaJackpot
+            if (deltaJackpot !== 0) {
+              exactJackpot += deltaJackpot
+              if (deltaJackpot > 0) {
+                this.jackpot = Math.min(Math.ceil(exactJackpot / 1000) * 1000, this.gameState.jackpot)
+              } else {
+                this.jackpot = Math.max(Math.floor(exactJackpot / 1000) * 1000, this.gameState.jackpot)
+              }
+            }
             count += 1
           } else {
             clearInterval(this.balanceUpdateInterval)
-            this.showMillisats = true
             this.balanceUpdateInterval = null
             this.balances = this.gameState.balances
             this.jackpot = this.gameState.jackpot
           }
-        }, 25)
+        }, 20)
       },
       formatMSatsAsSats(value) {
-        const valueInSats = value / 1000
-        return new Intl.NumberFormat('en-US', { maximumFractionDigits: 3}).format(
-          this.showMillisats ? valueInSats : Math.floor(valueInSats)
-        )
+        return new Intl.NumberFormat('en-US', { maximumFractionDigits: 3}).format(value / 1000)
       },
       resetReloadTimeout(callback, timeoutMs) {
         if (this.reloadTimeout) {
@@ -314,7 +327,6 @@
       if (this.balanceUpdateInterval) {
         clearInterval(this.balanceUpdateInterval)
         this.balanceUpdateInterval = null
-        this.showMillisats = true
       }
     },
   })
