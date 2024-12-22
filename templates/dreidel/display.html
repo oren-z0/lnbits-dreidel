@@ -107,7 +107,7 @@
               Prize is too small to be withdrawn.
             </div>
             <div v-else-if="withdrawLink.status === 'paid'" class="text-body1">
-              Prize has been paid out.
+              Prize of player <span v-text="withdrawPlayerIndex + 1"></span> has been paid out.
             </div>
             <div v-else-if="withdrawLink.status === 'pending'">
               <div class="row justify-center q-my-md">
