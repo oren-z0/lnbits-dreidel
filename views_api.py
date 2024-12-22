@@ -226,14 +226,20 @@ def _build_withdraw_link(req: Request, dreidel_id: str, player_index: int, balan
         return {
             "status": "too_small"
         }
-    lnurl = str(req.url_for("api_dreidels_withdraw")) + f"?k1={k1}"
-    print(lnurl)
-    return {
-        "amount_sats": balance // 1000,
-        "k1": k1,
-        "status": "pending",
-        "lnurl": lnurl_encode(lnurl),
-    }
+    lnurl = f"{req.url_for("api_dreidels_withdraw")}?k1={k1}"
+    try:
+        return {
+            "amount_sats": balance // 1000,
+            "k1": k1,
+            "status": "pending",
+            "lnurl": lnurl_encode(lnurl),
+        }
+    except:
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail=f"Failed to encode lnurl: {lnurl}"
+        )
+
 
 @dreidel_ext.get("/api/v1/dreidels-withdraw")
 async def api_dreidels_withdraw(req: Request, k1: str, pr: str | None = None):
