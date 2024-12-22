@@ -10,9 +10,9 @@
             <span class="text-subtitle1">Balance</span>
           </div>
           <div class="row">
-            <div v-for="(_finalBalance, playerIndex) in gameState.balances" :key="playerIndex" class="col-6 col-md-4">
+            <div v-for="(balance, playerIndex) in gameState.balances" :key="playerIndex" class="col-6 col-md-4">
               <span class="text-body2" :class="{'text-bold': gameState.current_player === playerIndex}">
-                Player <span v-text="playerIndex + 1"></span>: <span v-text="formatMSatsAsSats(balances[playerIndex])"></span> sats
+                Player <span v-text="playerIndex + 1"></span>: <span v-text="formatMSatsAsSats(balance)"></span> sats
               </span>
             </div>
           </div>
@@ -217,16 +217,18 @@
         }
         let deltaBalances = this.gameState.balances.map((balance, index) => (balance - this.balances[index]) / 40)
         if (deltaBalances.every(delta => delta === 0)) {
-          deltaBalances = undefined;
+          deltaBalances = undefined
         }
         const deltaJackpot = (this.gameState.jackpot - this.jackpot) / 40
         let count = 0
         this.balanceUpdateInterval = setInterval(() => {
           if (count < 40) {
             if (deltaBalances) {
-              this.balances = this.gameState.balances.map((balance, index) => balance + deltaBalances[index])
+              for (let i = 0; i < this.balances.length; i++) {
+                this.balances[i] += deltaBalances[i]
+              }
             }
-            this.jackpot = this.gameState.jackpot + deltaJackpot
+            this.jackpot += deltaJackpot
             count += 1
           } else {
             clearInterval(this.balanceUpdateInterval)
@@ -234,7 +236,7 @@
             this.balances = this.gameState.balances
             this.jackpot = this.gameState.jackpot
           }
-        }, 25);
+        }, 25)
       },
       formatMSatsAsSats(value) {
         return new Intl.NumberFormat('en-US', { maximumFractionDigits: 3}).format(value / 1000)
@@ -291,7 +293,7 @@
       },
       async endGame() {
         try {
-          await LNbits.api.request("POST", '{{ url_for("api_dreidel_end", dreidel_id=dreidel.id) }}');
+          await LNbits.api.request("POST", '{{ url_for("api_dreidel_end", dreidel_id=dreidel.id) }}')
         } catch (error) {
           LNbits.utils.notifyApiError(error)
         }
