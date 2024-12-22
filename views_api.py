@@ -300,7 +300,7 @@ async def api_dreidels_withdraw(req: Request, k1: str, pr: str | None = None):
                 max_sat=amount_sats,
                 extra={"tag": "dreidel-withdraw", "id": dreidel_id, "player_index": player_index},
             )
-            withdraw_link["status"] = "paid"
+            game_state["withdraw_links"][player_index]["status"] = "paid"
         except:
             return {"status": "ERROR", "reason": "Failed to pay invoice."}
         finally:
