@@ -166,6 +166,7 @@
         balances: null,
         jackpot: null,
         balanceUpdateInterval: null,
+        showMillisats: true,
       }
     },
     mounted() {
@@ -221,6 +222,7 @@
         }
         const deltaJackpot = (this.gameState.jackpot - this.jackpot) / 40
         let count = 0
+        this.showMillisats = false
         this.balanceUpdateInterval = setInterval(() => {
           if (count < 40) {
             if (deltaBalances) {
@@ -232,6 +234,7 @@
             count += 1
           } else {
             clearInterval(this.balanceUpdateInterval)
+            this.showMillisats = true
             this.balanceUpdateInterval = null
             this.balances = this.gameState.balances
             this.jackpot = this.gameState.jackpot
@@ -239,7 +242,10 @@
         }, 25)
       },
       formatMSatsAsSats(value) {
-        return new Intl.NumberFormat('en-US', { maximumFractionDigits: 3}).format(value / 1000)
+        const valueInSats = value / 1000
+        return new Intl.NumberFormat('en-US', { maximumFractionDigits: 3}).format(
+          this.showMillisats ? valueInSats : Math.floor(valueInSats)
+        )
       },
       resetReloadTimeout(callback, timeoutMs) {
         if (this.reloadTimeout) {
@@ -308,6 +314,7 @@
       if (this.balanceUpdateInterval) {
         clearInterval(this.balanceUpdateInterval)
         this.balanceUpdateInterval = null
+        this.showMillisats = true
       }
     },
   })
