@@ -96,13 +96,13 @@
             </div>
           </div>
           <div class="row justify-center">
-            <div v-for="(_withdrawLink, playerIndex) in gameState.withdraw_links" :key="playerIndex" class="col-3">
-              <q-btn flat no-caps padding="none" @click="withdrawPlayerIndex = playerIndex">
+            <div v-for="(playerWithdrawLink, playerIndex) in gameState.withdraw_links" :key="playerIndex" class="col-3">
+              <q-btn flat no-caps padding="none" @click="withdrawLink = playerWithdrawLink">
                 Player <span v-text="playerIndex + 1"></span>
               </q-btn>
             </div>
           </div>
-          <div v-if="withdrawLink !== null">
+          <div v-if="withdrawLink">
             <div v-if="withdrawLink.status === 'too_small'" class="text-body1" >
               Prize is too small to be withdrawn.
             </div>
@@ -162,19 +162,13 @@
           state: "loading",
         },
         reloadTimeout: null,
-        withdrawPlayerIndex: null,
+        withdrawLink: null,
       }
     },
     mounted() {
       void this.reloadGameState()
     },
     computed: {
-      withdrawLink() {
-        if (!this.gameState.withdraw_links || this.withdrawPlayerIndex === null) {
-          return undefined
-        }
-        return this.gameState.withdraw_links[this.withdrawPlayerIndex]
-      },
       dreidelResultDescription() {
         switch (this.gameState.dreidel_result) {
           case 0:
