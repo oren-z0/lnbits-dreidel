@@ -226,11 +226,13 @@ def _build_withdraw_link(req: Request, dreidel_id: str, player_index: int, balan
         return {
             "status": "too_small"
         }
+    lnurl = str(req.url_for("api_dreidels_withdraw")) + f"?k1={k1}"
+    print(lnurl)
     return {
         "amount_sats": balance // 1000,
         "k1": k1,
         "status": "pending",
-        "lnurl": lnurl_encode(str(req.url_for("api_dreidels_withdraw")) + f"?k1={k1}"),
+        "lnurl": lnurl_encode(lnurl),
     }
 
 @dreidel_ext.get("/api/v1/dreidels-withdraw")
