@@ -90,19 +90,19 @@
           </div>
         </div>
         <div v-else-if="gameState.state === 'ended'" class="q-mt-md">
-          <div class="row justify-center">
+          <div class="row">
             <div class="text-subtitle1">
-              Select a player to withdraw prizes from.
+              Select a player to withdraw prizes from:
             </div>
           </div>
-          <div class="row justify-center">
+          <div class="row">
             <div v-for="(playerWithdrawLink, playerIndex) in gameState.withdraw_links" :key="playerIndex" class="col-3">
               <q-btn flat no-caps padding="none" @click="withdrawLink = playerWithdrawLink">
                 Player <span v-text="playerIndex + 1"></span>
               </q-btn>
             </div>
           </div>
-          <div v-if="withdrawLink">
+          <div v-if="withdrawLink" class="row">
             <div v-if="withdrawLink.status === 'too_small'" class="text-body1" >
               Prize is too small to be withdrawn.
             </div>
