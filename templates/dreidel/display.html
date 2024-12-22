@@ -231,7 +231,7 @@
           this.resetReloadTimeout(this.reloadGameState, 2000)
           return
         }
-        if (this.gameState.state === "playing") {
+        if (this.gameState.state === "playing" && responseData.state !== "ended") {
           this.isAnimating = true
           this.gameState.jackpot += responseData.paid_amount
           this.dreidelTimeoutSeconds = responseData.spin_seconds
