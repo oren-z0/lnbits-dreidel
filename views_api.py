@@ -226,7 +226,8 @@ def _build_withdraw_link(req: Request, dreidel_id: str, player_index: int, balan
         return {
             "status": "too_small"
         }
-    lnurl = f"{req.url_for("api_dreidels_withdraw")}?k1={k1}"
+    api_dreidels_withdraw_url = req.url_for("api_dreidels_withdraw")
+    lnurl = f"{api_dreidels_withdraw_url}?k1={k1}"
     try:
         return {
             "amount_sats": balance // 1000,
