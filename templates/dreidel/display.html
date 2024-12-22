@@ -10,22 +10,22 @@
             <span class="text-subtitle1">Balance</span>
           </div>
           <div class="row">
-            <div v-for="(balance, playerIndex) in gameState.balances" :key="playerIndex" class="col-6 col-md-4">
+            <div v-for="(_finalBalance, playerIndex) in gameState.balances" :key="playerIndex" class="col-6 col-md-4">
               <span class="text-body2" :class="{'text-bold': gameState.current_player === playerIndex}">
-                Player <span v-text="playerIndex + 1"></span>: <span v-text="formatMSatsAsSats(balance)"></span> sats
+                Player <span v-text="playerIndex + 1"></span>: <span v-text="formatMSatsAsSats(balances[playerIndex])"></span> sats
               </span>
             </div>
           </div>
           <div class="row justify-center q-mt-md">
             <div class="text-body1 text-bold">
               <span v-if="gameState.state === 'funding'">
-                Funding Round (<span v-text="formatMSatsAsSats(gameState.jackpot)"></span> sats accumulated so far)
+                Funding Round (accumulated <span v-text="formatMSatsAsSats(jackpot)"></span> sats)
               </span>
               <span v-else-if="gameState.state === 'ended'">
                 Game Ended
               </span>
               <span v-else>
-                Jackpot: <span v-text="formatMSatsAsSats(gameState.jackpot)"></span> sats
+                Jackpot: <span v-text="formatMSatsAsSats(jackpot)"></span> sats
               </span>
             </div>
           </div>
@@ -163,6 +163,9 @@
         },
         reloadTimeout: null,
         withdrawPlayerIndex: null,
+        balances: null,
+        jackpot: null,
+        balanceUpdateInterval: null,
       }
     },
     mounted() {
@@ -201,6 +204,38 @@
       },
     },
     methods: {
+      onGameStatusUpdate() {
+        if (!this.balances) {
+          this.balances = this.gameState.balances
+        }
+        if (!this.jackpot) {
+          this.jackpot = this.gameState.jackpot
+        }
+        if (this.balanceUpdateInterval) {
+          clearInterval(this.balanceUpdateInterval)
+          this.balanceUpdateInterval = null
+        }
+        let deltaBalances = this.gameState.balances.map((balance, index) => (balance - this.balances[index]) / 40)
+        if (deltaBalances.every(delta => delta === 0)) {
+          deltaBalances = undefined;
+        }
+        const deltaJackpot = (this.gameState.jackpot - this.jackpot) / 40
+        let count = 0
+        this.balanceUpdateInterval = setInterval(() => {
+          if (count < 40) {
+            if (deltaBalances) {
+              this.balances = this.gameState.balances.map((balance, index) => balance + deltaBalances[index])
+            }
+            this.jackpot = this.gameState.jackpot + deltaJackpot
+            count += 1
+          } else {
+            clearInterval(this.balanceUpdateInterval)
+            this.balanceUpdateInterval = null
+            this.balances = this.gameState.balances
+            this.jackpot = this.gameState.jackpot
+          }
+        }, 25);
+      },
       formatMSatsAsSats(value) {
         return new Intl.NumberFormat('en-US', { maximumFractionDigits: 3}).format(value / 1000)
       },
@@ -234,12 +269,14 @@
         if (this.gameState.state === "playing" && responseData.state !== "ended") {
           this.isAnimating = true
           this.gameState.jackpot += responseData.paid_amount
+          this.onGameStatusUpdate()
           this.dreidelTimeoutSeconds = responseData.spin_seconds
           this.dreidelAngle = initialAngle + ((4 - responseData.dreidel_result) * 90) + (Math.floor((this.dreidelAngle - initialAngle) / 360) + responseData.spin_seconds) * 360
           await new Promise(resolve => setTimeout(resolve, responseData.spin_seconds * 1000))
           if (responseData.temporary_state) {
             this.lastGameState = this.gameState
             this.gameState = responseData.temporary_state
+            this.onGameStatusUpdate()
             await new Promise(resolve => setTimeout(resolve, 2000))
           }
           this.isAnimating = false
@@ -249,6 +286,7 @@
         }
         this.lastGameState = this.gameState
         this.gameState = responseData
+        this.onGameStatusUpdate()
         this.resetReloadTimeout(this.reloadGameState, 2000)
       },
       async endGame() {
@@ -264,6 +302,10 @@
       if (this.reloadTimeout) {
         clearTimeout(this.reloadTimeout)
         this.reloadTimeout = null
+      }
+      if (this.balanceUpdateInterval) {
+        clearInterval(this.balanceUpdateInterval)
+        this.balanceUpdateInterval = null
       }
     },
   })
