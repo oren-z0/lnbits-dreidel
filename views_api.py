@@ -218,7 +218,7 @@ async def api_dreidel_end(req: Request, dreidel_id: str):
     return {"ok": True}
 
 def _build_withdraw_link(req: Request, dreidel_id: str, player_index: int, balance: int) -> dict:
-    k1 = urlsafe_b64encode(json.dumps([dreidel_id, player_index, urlsafe_short_hash()]).encode()).replace(b'=', b'.')
+    k1 = urlsafe_b64encode(json.dumps([dreidel_id, player_index, urlsafe_short_hash()]).encode()).replace(b'=', b'.').decode()
     # pay_invoice upper limit is defined by max_sat, so we can't accept millisats.
     # They will be left in the server's wallet.
     amount_sats = balance // 1000
@@ -230,7 +230,7 @@ def _build_withdraw_link(req: Request, dreidel_id: str, player_index: int, balan
         "amount_sats": balance // 1000,
         "k1": k1,
         "status": "pending",
-        "lnurl": lnurl_encode(req.url_for("api_dreidels_withdraw", k1=k1)),
+        "lnurl": lnurl_encode(req.url_for("api_dreidels_withdraw") + f"?k1={k1}"),
     }
 
 @dreidel_ext.get("/api/v1/dreidels-withdraw")
