@@ -96,8 +96,8 @@
             </div>
           </div>
           <div class="row">
-            <div v-for="(playerWithdrawLink, playerIndex) in gameState.withdraw_links" :key="playerIndex" class="col-3">
-              <q-btn flat no-caps padding="none" @click="withdrawLink = playerWithdrawLink">
+            <div v-for="(_playerWithdrawLink, playerIndex) in gameState.withdraw_links" :key="playerIndex" class="col-3">
+              <q-btn flat no-caps padding="none" @click="withdrawPlayerIndex = playerIndex">
                 Player <span v-text="playerIndex + 1"></span>
               </q-btn>
             </div>
@@ -162,13 +162,19 @@
           state: "loading",
         },
         reloadTimeout: null,
-        withdrawLink: null,
+        withdrawPlayerIndex: null,
       }
     },
     mounted() {
       void this.reloadGameState()
     },
     computed: {
+      withdrawLink() {
+        if (!this.gameState.withdraw_links || this.withdrawPlayerIndex === null) {
+          return undefined
+        }
+        return this.gameState.withdraw_links[this.withdrawPlayerIndex]
+      },
       dreidelResultDescription() {
         switch (this.gameState.dreidel_result) {
           case 0:
