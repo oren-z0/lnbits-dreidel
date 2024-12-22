@@ -237,6 +237,11 @@
           this.dreidelTimeoutSeconds = responseData.spin_seconds
           this.dreidelAngle = initialAngle + ((4 - responseData.dreidel_result) * 90) + (Math.floor((this.dreidelAngle - initialAngle) / 360) + responseData.spin_seconds) * 360
           await new Promise(resolve => setTimeout(resolve, responseData.spin_seconds * 1000))
+          if (responseData.temporary_state) {
+            this.lastGameState = this.gameState
+            this.gameState = responseData.temporary_state
+            await new Promise(resolve => setTimeout(resolve, 2000))
+          }
           this.isAnimating = false
         } else if (this.gameState.state === "loading" && responseData.state === "shtel") {
           this.dreidelTimeoutSeconds = 0
