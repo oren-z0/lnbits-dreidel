@@ -12,6 +12,7 @@ async def m001_initial(db):
             spin_seconds {db.big_int} NOT NULL,
             players {db.big_int} NOT NULL,
             service_fee_percent {db.big_int} NOT NULL,
+            spinning_price {db.big_int} NOT NULL,
             game_state TEXT NOT NULL,
             payment_hash TEXT DEFAULT '',
             time TIMESTAMP NOT NULL DEFAULT """
