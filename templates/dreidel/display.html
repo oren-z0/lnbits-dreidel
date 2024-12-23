@@ -177,7 +177,7 @@
         reloadTimeout: null,
         withdrawPlayerIndex: null,
         balances: null,
-        jackpot: null,
+        jackpot: 0,
         balanceUpdateInterval: null,
         serviceFeePercent: Number('{{ dreidel.service_fee_percent }}'),
       }
@@ -220,10 +220,7 @@
     methods: {
       onGameStatusUpdate() {
         if (!this.balances) {
-          this.balances = this.gameState.balances
-        }
-        if (!this.jackpot) {
-          this.jackpot = this.gameState.jackpot
+          this.balances = this.gameState.balances.slice()
         }
         if (this.balanceUpdateInterval) {
           clearInterval(this.balanceUpdateInterval)
@@ -266,7 +263,7 @@
           } else {
             clearInterval(this.balanceUpdateInterval)
             this.balanceUpdateInterval = null
-            this.balances = this.gameState.balances
+            this.balances = this.gameState.balances.slice()
             this.jackpot = this.gameState.jackpot
             this.state = this.gameState.state
           }
