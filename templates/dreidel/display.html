@@ -304,7 +304,7 @@
           this.isAnimating = false
         } else if (this.gameState.state === "loading") {
           this.dreidelTimeoutSeconds = 0
-          this.dreidelAngle = initlalAngle + (4 - responseData.dreidel_result) * 90
+          this.dreidelAngle = initialAngle + (4 - responseData.dreidel_result) * 90
         }
         this.lastGameState = this.gameState.state
         this.gameState = responseData
