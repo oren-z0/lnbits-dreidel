@@ -4,6 +4,10 @@
 
 We recommend using this extension on LNBits v0.12.12.
 
+## Watch the demo
+
+[![Watch the video](static/image/screenshot.png)](https://v.nostr.build/Lk52oTrR1hSOR9hc.mp4)
+
 ## Game rules
 
 - The game begins with every player has 0 on their balance, and an empty jackpot.
