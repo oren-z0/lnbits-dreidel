@@ -75,7 +75,7 @@
               <span v-else-if="gameState.state === 'shtel'"> to continue.</span>
             </div>
           </div>
-          <div class="row justify-center q-my-md">
+          <div class="row justify-center q-mt-md">
             <div class="col-10 col-md-8 col-lg-6 col-xl-6">
               <a class="text-secondary" :href="'lightning:' + gameState.payment_request">
                 <q-responsive :ratio="1" class="q-mb-md">
@@ -88,10 +88,10 @@
               </a>
             </div>
           </div>
-          <div class="row justify-center" class="q-my-sm">
+          <div class="row justify-center">
             <span class="text-body2" v-text="formatSats(gameState.payment_request_amount)"></span>
           </div>
-          <div class="row justify-center">
+          <div class="row justify-center q-mt-sm">
             <q-btn class="q-mx-sm" outline color="grey" @click="copyText(gameState.payment_request)">
               Copy invoice
             </q-btn>
