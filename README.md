@@ -9,9 +9,8 @@ We recommend using this extension on LNBits v0.12.12.
 - The game begins with every player has 0 on their balance, and an empty jackpot.
 A funding round is done by each player paying the bet amount to the jackpot.
 - Each player needs to spin the dreidel on their turn.
-This is done by paying another invoice of the bet amount.
-(This is not done in the traditional game, but it allows to put this party-game on a TV screen and
-let players interact by paying invoices, instead of having to click things).
+This is done by paying another invoice of the dreidel-spinning price that goes to the service provider
+(default 1 sat).
 - Possible dreidel results are:
   - Nisht Arayn - נישט: The player wins nothing.
   - Gantz - גאַנץ: The player wins the entire jackpot.
