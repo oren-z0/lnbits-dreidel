@@ -16,7 +16,7 @@ let players interact by paying invoices, instead of having to click things).
   - Nisht Arayn - נישט: The player wins nothing.
   - Gantz - גאַנץ: The player wins the entire jackpot.
   - Halb - האַלב: The player wins half of the jackpot. If the jackpot amount is odd, the reward is rounded
-  in favor of the player.
+  in favor of the player (millisats are not supported).
   - Shtel Arayn - שטעל אַרַײן: The player has to pay again. The amount will be deducted automatically
   if the player has enough on their balance, otherwise an invoice will be created for the player to pay.
 - When the jackpot gets empty, we have another funding round.
