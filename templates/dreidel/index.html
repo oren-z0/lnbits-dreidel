@@ -127,6 +127,14 @@
         <q-input
           filled
           dense
+          v-model.number="formDialog.data.initial_balance"
+          type="number"
+          label="Initial Balance (sat) *"
+          hint="Initial funding round will ask each player to fund their balance so the rest of the gameplay will be smoother."
+        ></q-input>
+        <q-input
+          filled
+          dense
           v-model.number="formDialog.data.spin_seconds"
           type="number"
           label="Spin seconds *"
@@ -237,6 +245,7 @@
           spin_seconds: 10,
           service_fee_percent: 0,
           spinning_price: 1,
+          initial_balance: 100,
         }
       },
       getDreidels: function () {

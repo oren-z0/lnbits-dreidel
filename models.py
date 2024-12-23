@@ -13,6 +13,7 @@ class CreateDreidel(BaseModel):
     players: int = Query(..., ge=2, le=50)
     service_fee_percent: int = Query(..., ge=0, le=100)
     spinning_price: int = Query(..., ge=1)
+    initial_balance: int = Query(..., ge=0)
 
 class UpdateDreidel(BaseModel):
     memo: str = Query(...)
@@ -37,6 +38,7 @@ class Dreidel(BaseModel):
     time: int
     service_fee_percent: int
     spinning_price: int
+    initial_balance: int
 
     @classmethod
     def from_row(cls, row: Row) -> "Dreidel":
