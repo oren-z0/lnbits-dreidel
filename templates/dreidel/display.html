@@ -54,11 +54,11 @@
               <span v-text="titles[gameState.dreidel_result]"></span>
             </div>
           </div>
-          <div class="row justify-center">
+          <div class="row justify-center" v-if="gameState.last_player !== undefined">
             <div class="text-body1" v-text="dreidelResultDescription"></div>
           </div>
-          <div class="row justify-center" v-if="lastGameState.state === 'funding' && gameState.state !== 'funding' && gameState.state !== 'ended'">
-            <div class="text-body1">The jackpot became empty and got funded by all players.</div>
+          <div class="row justify-center" v-if="lastGameState === 'funding' && gameState.state !== 'funding' && gameState.state !== 'ended'">
+            <div class="text-body1">The empty jackpot was funded by all players.</div>
           </div>
         </div>
         <div v-if="!isAnimating && gameState.payment_request && gameState.state !== 'ended'" class="q-mt-md">
@@ -157,9 +157,7 @@
           "Halb - האַלב",
           "Shtel Arayn - שטעל אַרַײן",
         ],
-        lastGameState: {
-          "state": "loading",
-        },
+        lastGameState: "loading",
         isAnimating: false,
         gameState: {
           state: "loading",
@@ -184,16 +182,16 @@
       dreidelResultDescription() {
         switch (this.gameState.dreidel_result) {
           case 0:
-            return `Player ${this.lastGameState.current_player + 1} won nothing.`
+            return `Player ${this.gameState.last_player + 1} won nothing.`
           case 1:
-            return `Player ${this.lastGameState.current_player + 1} won the entire jackpot.`
+            return `Player ${this.gameState.last_player + 1} won the entire jackpot.`
           case 2:
-            return `Player ${this.lastGameState.current_player + 1} won half the jackpot.`
+            return `Player ${this.gameState.last_player + 1} won half the jackpot.`
           case 3:
             if (this.gameState.state === "shtel") {
-              return `Player ${this.lastGameState.current_player + 1} lost - must pay again.`
+              return `Player ${this.gameState.last_player + 1} lost - must pay again.`
             } else {
-              return `Player ${this.lastGameState.current_player + 1} lost - paid again from balance.`
+              return `Player ${this.gameState.last_player + 1} lost - paid again from balance.`
             }
           default:
             return ""
@@ -298,17 +296,17 @@
           this.dreidelAngle = initialAngle + ((4 - responseData.dreidel_result) * 90) + (Math.floor((this.dreidelAngle - initialAngle) / 360) + responseData.spin_seconds) * 360
           await new Promise(resolve => setTimeout(resolve, responseData.spin_seconds * 1000))
           if (responseData.temporary_state) {
-            this.lastGameState = this.gameState
+            this.lastGameState = this.gameState.state
             this.gameState = responseData.temporary_state
             this.onGameStatusUpdate()
             await new Promise(resolve => setTimeout(resolve, 4000))
           }
           this.isAnimating = false
-        } else if (this.gameState.state === "loading" && responseData.state === "shtel") {
+        } else if (this.gameState.state === "loading") {
           this.dreidelTimeoutSeconds = 0
-          this.dreidelAngle = 360 // initlalAngle + (4 - 3) * 90
+          this.dreidelAngle = initlalAngle + (4 - responseData.dreidel_result) * 90
         }
-        this.lastGameState = this.gameState
+        this.lastGameState = this.gameState.state
         this.gameState = responseData
         this.onGameStatusUpdate()
         this.resetReloadTimeout(this.reloadGameState, 2000)

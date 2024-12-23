@@ -129,6 +129,7 @@ async def api_dreidel_game_state(dreidel_id: str):
                 game_state["state"] = "playing"
                 game_state["current_player"] = game_state["after_funding_player"]
         elif game_state["state"] == "playing":
+            game_state["last_player"] = game_state["current_player"]
             game_state["dreidel_result"] = dreidel_random()
             if game_state["dreidel_result"] == 0: # Nisht
                 game_state["current_player"] = (game_state["current_player"] + 1) % dreidel.players
