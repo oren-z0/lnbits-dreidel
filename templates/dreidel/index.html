@@ -130,7 +130,7 @@
           v-model.number="formDialog.data.spin_seconds"
           type="number"
           label="Spin seconds *"
-          hint="Time for the dreidel spin animation"
+          hint="Time for the dreidel spin animation (minimum 2 seconds)"
         ></q-input>
         <q-input
           v-if="!formDialog.data.id"
@@ -211,8 +211,9 @@
           this.formDialog.data.bet_amount &&
           this.formDialog.data.bet_amount >= 1 &&
           this.formDialog.data.spin_seconds &&
-          this.formDialog.data.spin_seconds >= 1 &&
-          (this.formDialog.data.id ||
+          this.formDialog.data.spin_seconds >= 2 &&
+          this.formDialog.data.service_fee_percent >= 0 &&
+          this.formDialog.data.service_fee_percent <= 100 &&          (this.formDialog.data.id ||
             (this.formDialog.data.players &&
               this.formDialog.data.players >= 2)) &&
           this.formDialog.data.memo
@@ -255,6 +256,7 @@
             ...!dreidelId && {
               players: this.formDialog.data.players,
             },
+            service_fee_percent: this.formDialog.data.service_fee_percent,
           }
 
           let method = 'POST'
