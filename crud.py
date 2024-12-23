@@ -12,8 +12,8 @@ async def create_dreidel(wallet_id: str, data: CreateDreidel) -> Dreidel:
     await db.execute(
         """
         INSERT INTO dreidel.dreidels
-        (id, wallet, memo, bet_amount, spin_seconds, players, service_fee_percent, game_state)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        (id, wallet, memo, bet_amount, spin_seconds, players, service_fee_percent, spinning_price, game_state)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             dreidel_id,
@@ -23,6 +23,7 @@ async def create_dreidel(wallet_id: str, data: CreateDreidel) -> Dreidel:
             data.spin_seconds,
             data.players,
             data.service_fee_percent,
+            data.spinning_price,
             json.dumps({
                 "state": "initial",
             }),
@@ -38,8 +39,8 @@ async def update_dreidel(id: str, wallet_id: str, data: UpdateDreidel) -> Dreide
     await db.execute(
         """
         UPDATE dreidel.dreidels
-        SET (memo, bet_amount, spin_seconds, service_fee_percent) =
-        (?, ?, ?, ?)
+        SET (memo, bet_amount, spin_seconds, service_fee_percent, spinning_price) =
+        (?, ?, ?, ?, ?)
         WHERE id = ? AND wallet = ?
         """,
         (
@@ -47,6 +48,7 @@ async def update_dreidel(id: str, wallet_id: str, data: UpdateDreidel) -> Dreide
             data.bet_amount,
             data.spin_seconds,
             data.service_fee_percent,
+            data.spinning_price,
             id,
             wallet_id,
         ),

@@ -146,8 +146,16 @@
           dense
           v-model.number="formDialog.data.service_fee_percent"
           type="number"
-          label="Service Fee Percentage"
+          label="Service Fee Percentage *"
           hint="Percentage fee to be deducted from each player's balance at the end."
+        ></q-input>
+        <q-input
+          filled
+          dense
+          v-model.number="formDialog.data.spinning_price"
+          type="number"
+          label="Spinning Price (sat) *"
+          hint="Amount to pay for spinning the dreidel - will be paid to the service provider (minimum 1 sat)"
         ></q-input>
         <div class="row q-mt-lg">
           <q-btn
@@ -213,7 +221,9 @@
           this.formDialog.data.spin_seconds &&
           this.formDialog.data.spin_seconds >= 2 &&
           this.formDialog.data.service_fee_percent >= 0 &&
-          this.formDialog.data.service_fee_percent <= 100 &&          (this.formDialog.data.id ||
+          this.formDialog.data.service_fee_percent <= 100 &&
+          this.formDialog.data.spinning_price >= 1 &&
+          (this.formDialog.data.id ||
             (this.formDialog.data.players &&
               this.formDialog.data.players >= 2)) &&
           this.formDialog.data.memo
@@ -226,6 +236,7 @@
           bet_amount: 10,
           spin_seconds: 10,
           service_fee_percent: 0,
+          spinning_price: 1,
         }
       },
       getDreidels: function () {
@@ -257,6 +268,7 @@
               players: this.formDialog.data.players,
             },
             service_fee_percent: this.formDialog.data.service_fee_percent,
+            spinning_price: this.formDialog.data.spinning_price,
           }
 
           let method = 'POST'
