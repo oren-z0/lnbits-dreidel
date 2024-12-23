@@ -121,7 +121,7 @@
               Prize of player <span v-text="withdrawPlayerIndex + 1"></span> has been paid out.
             </div>
             <div v-else-if="withdrawLink.status === 'pending'">
-              <div class="row justify-center q-my-md">
+              <div class="row justify-center q-mt-md">
                 <div class="col-10 col-md-8 col-lg-6 col-xl-6">
                   <a class="text-secondary" :href="'lightning:' + withdrawLink.lnurl">
                     <q-responsive :ratio="1" class="q-mb-md">
@@ -134,10 +134,10 @@
                   </a>
                 </div>
               </div>
-              <div class="row justify-center q-my-sm">
-                <span v-class="text-body2" v-text="formatSats(withdrawLink.amount)"></span>
-              </div>
               <div class="row justify-center">
+                <span class="text-body2" v-text="formatSats(withdrawLink.amount_sats)"></span>
+              </div>
+              <div class="row justify-center q-mt-sm">
                 <q-btn outline color="grey" @click="copyText(withdrawLink.lnurl)">
                   Copy LNURL
                 </q-btn>
