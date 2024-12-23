@@ -302,7 +302,7 @@
             await new Promise(resolve => setTimeout(resolve, 4000))
           }
           this.isAnimating = false
-        } else if (this.gameState.state === "loading") {
+        } else if (this.gameState.state === "loading" && responseData.dreidel_result !== undefined) {
           this.dreidelTimeoutSeconds = 0
           this.dreidelAngle = initialAngle + (4 - responseData.dreidel_result) * 90
         }
