@@ -34,85 +34,28 @@
         <code>{"X-Api-Key": &lt;admin_key&gt;}</code><br />
         <h5 class="text-caption q-mt-sm q-mb-none">Body (application/json)</h5>
         <code
-          >{"amount": &lt;integer&gt;, "memo":
-          &lt;string&gt;, "url":
-          &lt;string&gt;}</code
+          >{"bet_amount": &lt;integer&gt;, "memo":
+          &lt;string&gt;, "spin_seconds":
+          &lt;integer&gt;, "players":
+          &lt;integer&gt;}</code
         >
         <h5 class="text-caption q-mt-sm q-mb-none">
           Returns 201 CREATED (application/json)
         </h5>
         <code
-          >{"amount": &lt;integer&gt;, "id":
+          >{"bet_amount": &lt;integer&gt;, "id":
           &lt;string&gt;, "memo": &lt;string&gt;,
-          "time": &lt;int&gt;, "url": &lt;string&gt;, "wallet":
-          &lt;string&gt;}</code
+          "time": &lt;int&gt;, "spin_seconds": &lt;integer&gt;, "wallet":
+          &lt;string&gt;, "players": &lt;integer&gt;, "game_state":
+          &lt;string&gt;, "payment_hash": &lt;string&gt;}</code
         >
         <h5 class="text-caption q-mt-sm q-mb-none">Curl example</h5>
         <code
           >curl -X POST {{ request.base_url }}dreidel/api/v1/dreidels -d
-          '{"url": &lt;string&gt;, "memo": &lt;string&gt;, "amount": &lt;integer&gt;
-          }' -H "Content-type: application/json" -H "X-Api-Key:
+          '{"url": &lt;string&gt;, "memo": &lt;string&gt;, "bet_amount": &lt;integer&gt;,
+          "spin_seconds": &lt;integer&gt;, "players": &lt;integer&gt;}' -H
+          "Content-type: application/json" -H "X-Api-Key:
           {{ user.wallets[0].adminkey }}"
-        </code>
-      </q-card-section>
-    </q-card>
-  </q-expansion-item>
-  <q-expansion-item
-    group="api"
-    dense
-    expand-separator
-    label="Create an invoice (public)"
-  >
-    <q-card>
-      <q-card-section>
-        <code
-          ><span class="text-green">POST</span>
-          /dreidel/api/v1/dreidels/invoice/{dreidel_id}
-        </code>
-        <h5 class="text-caption q-mt-sm q-mb-none">Body (application/json)</h5>
-        <code>{"amount": &lt;integer&gt;}</code>
-        <h5 class="text-caption q-mt-sm q-mb-none">
-          Returns 201 CREATED (application/json)
-        </h5>
-        <code
-          >{"payment_hash": &lt;string&gt;, "payment_request":
-          &lt;string&gt;}</code
-        >
-        <h5 class="text-caption q-mt-sm q-mb-none">Curl example</h5>
-        <code
-          >curl -X POST {{ request.base_url
-          }}dreidel/api/v1/dreidels/invoice/{dreidel_id} -d '{"amount":
-          &lt;integer&gt;}' -H "Content-type: application/json"
-        </code>
-      </q-card-section>
-    </q-card>
-  </q-expansion-item>
-  <q-expansion-item
-    group="api"
-    dense
-    expand-separator
-    label="Check invoice status (public)"
-  >
-    <q-card>
-      <q-card-section>
-        <code
-          ><span class="text-green">POST</span>
-          /dreidel/api/v1/dreidels/check_invoice/&lt;dreidel_id&gt;/</code
-        >
-        <h5 class="text-caption q-mt-sm q-mb-none">Body (application/json)</h5>
-        <code>{"payment_hash": &lt;string&gt;}</code>
-        <h5 class="text-caption q-mt-sm q-mb-none">
-          Returns 200 OK (application/json)
-        </h5>
-        <code>{"paid": false}</code><br />
-        <code
-          >{"paid": true, "url": &lt;string&gt;}</code
-        >
-        <h5 class="text-caption q-mt-sm q-mb-none">Curl example</h5>
-        <code
-          >curl -X POST {{ request.base_url
-          }}dreidel/api/v1/dreidels/check_invoice/&lt;dreidel_id&gt; -d
-          '{"payment_hash": &lt;string&gt;}' -H "Content-type: application/json"
         </code>
       </q-card-section>
     </q-card>
