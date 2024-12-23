@@ -48,7 +48,7 @@
               <div class="triangle side5"></div>
           </div>
         </div>
-        <div v-if="!isAnimating && lastGameState.state === 'playing'" class="q-mt-lg">
+        <div v-if="!isAnimating && gameState.dreidel_result !== undefined" class="q-mt-lg">
           <div class="row justify-center">
             <div class="text-h4">
               <span v-text="titles[gameState.dreidel_result]"></span>
@@ -56,6 +56,9 @@
           </div>
           <div class="row justify-center">
             <div class="text-body1" v-text="dreidelResultDescription"></div>
+          </div>
+          <div class="row justify-center" v-if="lastGameState.state === 'funding' && gameState.state !== 'funding' && gameState.state !== 'ended'">
+            <div class="text-body1">The jackpot became empty and got funded by all players.</div>
           </div>
         </div>
         <div v-if="!isAnimating && gameState.payment_request && gameState.state !== 'ended'" class="q-mt-md">
