@@ -231,7 +231,7 @@ async def api_dreidel_end(req: Request, dreidel_id: str):
     game_state["jackpot"] = 0
     game_state["locked"] = False
     game_state["withdraw_links"] = [
-        _build_withdraw_link(req, dreidel.id, player_index, balance)
+        _build_withdraw_link(req, dreidel.id, player_index, balance * (100 - dreidel.service_fee_percent) // 100)
         for player_index, balance in enumerate(game_state["balances"])
     ]
     game_state["updated_at"] = time()

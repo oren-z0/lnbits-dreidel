@@ -141,6 +141,14 @@
           label="Number of players *"
           hint="At least 2 players are required"
         ></q-input>
+        <q-input
+          filled
+          dense
+          v-model.number="formDialog.data.service_fee_percent"
+          type="number"
+          label="Service Fee Percentage"
+          hint="Percentage fee to be deducted from each player's balance at the end. The service also deducts any millisats from the prizes."
+        ></q-input>
         <div class="row q-mt-lg">
           <q-btn
             unelevated
@@ -216,6 +224,7 @@
         return {
           bet_amount: 10,
           spin_seconds: 10,
+          service_fee_percent: 0,
         }
       },
       getDreidels: function () {
