@@ -88,6 +88,9 @@
               </a>
             </div>
           </div>
+          <div class="row justify-center" class="q-my-sm">
+            <span class="text-body2" v-text="formatSats(gameState.payment_request_amount)"></span>
+          </div>
           <div class="row justify-center">
             <q-btn class="q-mx-sm" outline color="grey" @click="copyText(gameState.payment_request)">
               Copy invoice
