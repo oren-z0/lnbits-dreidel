@@ -9,14 +9,14 @@ from pydantic import BaseModel
 class CreateDreidel(BaseModel):
     memo: str = Query(..., max_length=100)
     bet_amount: int = Query(..., ge=1)
-    spin_seconds: int = Query(..., ge=1, le=600)
+    spin_seconds: int = Query(..., ge=2, le=600)
     players: int = Query(..., ge=2, le=50)
     service_fee_percent: int = Query(..., ge=0, le=100)
 
 class UpdateDreidel(BaseModel):
     memo: str = Query(...)
     bet_amount: int = Query(..., ge=1)
-    spin_seconds: int = Query(..., ge=1)
+    spin_seconds: int = Query(..., ge=2, le=600)
     service_fee_percent: int = Query(..., ge=0, le=100)
 
 class UpdateDreidelGameState(BaseModel):
