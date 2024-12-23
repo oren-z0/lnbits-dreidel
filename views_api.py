@@ -112,9 +112,9 @@ async def api_dreidel_game_state(dreidel_id: str):
         game_state["funding_players"] = list(range(dreidel.players))
         game_state["after_funding_player"] = 0
         game_state["jackpot"] = 0
-        payment_hash, payment_request = await _create_dreidel_funding_invoice(dreidel, game_state["initial_funding_completed"])
-        game_state["payment_request"] = payment_request
-        game_state["payment_request_amount"] = dreidel.bet_amount
+        game_state["payment_request_amount"], payment_hash, game_state["payment_request"] = await _create_dreidel_funding_invoice(
+            dreidel, game_state["initial_funding_completed"]
+        )
         game_state["updated_at"] = time()
         game_state["temporary_state"] = None
         await update_dreidel_game_state(dreidel, dreidel.wallet, game_state, payment_hash)
@@ -175,12 +175,11 @@ async def api_dreidel_game_state(dreidel_id: str):
             game_state["jackpot"] += paid_amount
             game_state["state"] = "playing"
             game_state["current_player"] = (game_state["current_player"] + 1) % dreidel.players
-        if game_state["state"] == "playing":
-            game_state["payment_request_amount"] = dreidel.spinning_price
-            payment_hash, payment_request = await _create_dreidel_spinning_invoice(dreidel)
-        else:
-            game_state["payment_request_amount"] = dreidel.bet_amount
-            payment_hash, payment_request = await _create_dreidel_funding_invoice(dreidel, game_state["initial_funding_completed"])
+        game_state["payment_request_amount"], payment_hash, payment_request = await (
+            _create_dreidel_spinning_invoice(dreidel)
+            if game_state["state"] == "playing"
+            else _create_dreidel_funding_invoice(dreidel, game_state["initial_funding_completed"])
+        )
         game_state["payment_request"] = payment_request
         game_state["updated_at"] = time()
         await update_dreidel_game_state(dreidel, dreidel.wallet, game_state, payment_hash)
@@ -189,20 +188,21 @@ async def api_dreidel_game_state(dreidel_id: str):
     return game_state
 
 async def _create_dreidel_funding_invoice(dreidel: Dreidel, initial_funding_completed: bool):
-    return await create_invoice(
+    amount = dreidel.bet_amount + (0 if initial_funding_completed else dreidel.initial_balance)
+    return (amount, *(await create_invoice(
         wallet_id=dreidel.wallet,
-        amount=dreidel.bet_amount + (0 if initial_funding_completed else dreidel.initial_balance),
+        amount=amount,
         memo=f"Funding dreidel game: {dreidel.memo}",
         extra={"tag": "dreidel", "id": dreidel.id},
-    )
+    )))
 
 async def _create_dreidel_spinning_invoice(dreidel: Dreidel):
-    return await create_invoice(
+    return (dreidel.spinning_price, *(await create_invoice(
         wallet_id=dreidel.wallet,
         amount=dreidel.spinning_price,
         memo=f"Spin dreidel: {dreidel.memo}",
         extra={"tag": "dreidel", "id": dreidel.id},
-    )
+    )))
 
 async def _get_amount_paid(dreidel: Dreidel) -> int: # in sats
     if not dreidel.payment_hash:
