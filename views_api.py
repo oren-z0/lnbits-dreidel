@@ -103,8 +103,7 @@ async def api_dreidel_game_state(dreidel_id: str):
             status_code=HTTPStatus.NOT_FOUND, detail="Dreidel game instance does not exist."
         )
     game_state = json.loads(dreidel.game_state)
-    paid_amount_msats = await _get_amount_paid(dreidel)
-    bet_amount_msats = dreidel.bet_amount * 1000
+    paid_amount = await _get_amount_paid(dreidel)
     if game_state["state"] == "initial":
         game_state["state"] = "funding"
         game_state["balances"] = [0] * dreidel.players
@@ -117,10 +116,10 @@ async def api_dreidel_game_state(dreidel_id: str):
         game_state["updated_at"] = time()
         game_state["temporary_state"] = None
         await update_dreidel_game_state(dreidel, dreidel.wallet, game_state, payment_hash)
-    elif paid_amount_msats > 0:
+    elif paid_amount > 0:
         game_state["temporary_state"] = None
-        game_state["jackpot"] += paid_amount_msats
-        game_state["paid_amount"] = paid_amount_msats
+        game_state["jackpot"] += paid_amount
+        game_state["paid_amount"] = paid_amount
         if game_state["state"] == "funding":
             game_state["funding_players"] = [player_index for player_index in game_state["funding_players"] if player_index != game_state["current_player"]]
             if len(game_state["funding_players"]) > 0:
@@ -143,11 +142,11 @@ async def api_dreidel_game_state(dreidel_id: str):
                 game_state["jackpot"] -= halve_amount
                 game_state["current_player"] = (game_state["current_player"] + 1) % dreidel.players
             elif game_state["dreidel_result"] == 3: # Shtel
-                if game_state["balances"][game_state["current_player"]] < bet_amount_msats:
+                if game_state["balances"][game_state["current_player"]] < dreidel.bet_amount:
                     game_state["state"] = "shtel"
                 else:
-                    game_state["balances"][game_state["current_player"]] -= bet_amount_msats
-                    game_state["jackpot"] += bet_amount_msats
+                    game_state["balances"][game_state["current_player"]] -= dreidel.bet_amount
+                    game_state["jackpot"] += dreidel.bet_amount
                     game_state["current_player"] = (game_state["current_player"] + 1) % dreidel.players
             if game_state["jackpot"] <= 0:
                 game_state["state"] = "funding"
@@ -156,12 +155,12 @@ async def api_dreidel_game_state(dreidel_id: str):
                     for index in range(dreidel.players)
                 ]
                 game_state["after_funding_player"] = game_state["current_player"]
-                can_fund_players = [player_index for player_index in game_state["funding_players"] if game_state["balances"][player_index] > bet_amount_msats]
+                can_fund_players = [player_index for player_index in game_state["funding_players"] if game_state["balances"][player_index] >= dreidel.bet_amount]
                 if len(can_fund_players) > 0:
                     game_state["temporary_state"] = json.loads(json.dumps(game_state))
                     for player_index in can_fund_players:
-                        game_state["balances"][player_index] -= bet_amount_msats
-                        game_state["jackpot"] += bet_amount_msats
+                        game_state["balances"][player_index] -= dreidel.bet_amount
+                        game_state["jackpot"] += dreidel.bet_amount
                     game_state["funding_players"] = [player_index for player_index in game_state["funding_players"] if player_index not in can_fund_players]
                     if len(game_state["funding_players"]) > 0:
                         game_state["current_player"] = game_state["funding_players"][0]
@@ -188,7 +187,7 @@ async def _create_dreidel_invoice(dreidel: Dreidel):
     )
 
 
-async def _get_amount_paid(dreidel: Dreidel) -> int: # in millisats
+async def _get_amount_paid(dreidel: Dreidel) -> int: # in sats
     if not dreidel.payment_hash:
         return 0
     try:
@@ -206,7 +205,7 @@ async def _get_amount_paid(dreidel: Dreidel) -> int: # in millisats
         if dreidel_id and dreidel_id != dreidel.id:
             return 0
 
-        return payment.amount
+        return payment.amount // 1000  # Convert msats to sats
     return 0
 
 @dreidel_ext.post("/api/v1/dreidels/{dreidel_id}/end")
@@ -240,10 +239,7 @@ async def api_dreidel_end(req: Request, dreidel_id: str):
 
 def _build_withdraw_link(req: Request, dreidel_id: str, player_index: int, balance: int) -> dict:
     k1 = urlsafe_b64encode(json.dumps([dreidel_id, player_index, urlsafe_short_hash()]).encode()).replace(b'=', b'.').decode()
-    # pay_invoice upper limit is defined by max_sat, so we can't accept millisats.
-    # They will be left in the server's wallet.
-    amount_sats = balance // 1000
-    if amount_sats <= 0:
+    if balance <= 0:
         return {
             "status": "too_small"
         }
@@ -259,7 +255,7 @@ def _build_withdraw_link(req: Request, dreidel_id: str, player_index: int, balan
             detail=f"Failed to encode lnurl: {lnurl}"
         )
     return {
-        "amount_sats": balance // 1000,
+        "amount_sats": balance,
         "k1": k1,
         "status": "pending",
         "lnurl": encoded_lnurl,

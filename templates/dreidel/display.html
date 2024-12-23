@@ -12,20 +12,20 @@
           <div class="row">
             <div v-for="(balance, playerIndex) in balances" :key="playerIndex" class="col-6 col-md-4">
               <span class="text-body2" :class="{'text-bold': gameState.current_player === playerIndex}">
-                Player <span v-text="playerIndex + 1"></span>: <span v-text="formatMSatsAsSats(balance)"></span> sats
+                Player <span v-text="playerIndex + 1"></span>: <span v-text="formatSats(balance)"></span> sats
               </span>
             </div>
           </div>
           <div class="row justify-center q-mt-md">
             <div class="text-body1 text-bold">
               <span v-if="state === 'funding'">
-                Funding Round (accumulated <span v-text="formatMSatsAsSats(jackpot)"></span> sats)
+                Funding Round (accumulated <span v-text="jackpot"></span> sats)
               </span>
               <span v-else-if="state === 'ended'">
                 Game Ended
               </span>
               <span v-else>
-                Jackpot: <span v-text="formatMSatsAsSats(jackpot)"></span> sats
+                Jackpot: <span v-text="formatSats(jackpot)"></span> sats
               </span>
             </div>
           </div>
@@ -242,18 +242,18 @@
                 }
                 exactBalances[i] += deltaBalances[i]
                 if (deltaBalances[i] > 0) {
-                  this.balances[i] = Math.min(Math.ceil(exactBalances[i] / 1000) * 1000, this.gameState.balances[i])
+                  this.balances[i] = Math.min(Math.ceil(exactBalances[i]), this.gameState.balances[i])
                 } else {
-                  this.balances[i] = Math.max(Math.floor(exactBalances[i] / 1000) * 1000, this.gameState.balances[i])
+                  this.balances[i] = Math.max(Math.floor(exactBalances[i]), this.gameState.balances[i])
                 }
               }
             }
             if (deltaJackpot !== 0) {
               exactJackpot += deltaJackpot
               if (deltaJackpot > 0) {
-                this.jackpot = Math.min(Math.ceil(exactJackpot / 1000) * 1000, this.gameState.jackpot)
+                this.jackpot = Math.min(Math.ceil(exactJackpot), this.gameState.jackpot)
               } else {
-                this.jackpot = Math.max(Math.floor(exactJackpot / 1000) * 1000, this.gameState.jackpot)
+                this.jackpot = Math.max(Math.floor(exactJackpot), this.gameState.jackpot)
               }
             }
             count += 1
@@ -266,8 +266,8 @@
           }
         }, 20)
       },
-      formatMSatsAsSats(value) {
-        return new Intl.NumberFormat('en-US', { maximumFractionDigits: 3}).format(value / 1000)
+      formatSats(value) {
+        return new Intl.NumberFormat('en-US').format(value)
       },
       resetReloadTimeout(callback, timeoutMs) {
         if (this.reloadTimeout) {
