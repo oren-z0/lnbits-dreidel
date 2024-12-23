@@ -18,10 +18,10 @@
           </div>
           <div class="row justify-center q-mt-md">
             <div class="text-body1 text-bold">
-              <span v-if="gameState.state === 'funding'">
+              <span v-if="state === 'funding'">
                 Funding Round (accumulated <span v-text="formatMSatsAsSats(jackpot)"></span> sats)
               </span>
-              <span v-else-if="gameState.state === 'ended'">
+              <span v-else-if="state === 'ended'">
                 Game Ended
               </span>
               <span v-else>
@@ -57,7 +57,7 @@
           <div class="row justify-center" v-if="gameState.last_player !== undefined">
             <div class="text-body1" v-text="dreidelResultDescription"></div>
           </div>
-          <div class="row justify-center" v-if="lastGameState === 'funding' && gameState.state !== 'funding' && gameState.state !== 'ended'">
+          <div class="row justify-center" v-if="lastState === 'funding' && gameState.state !== 'funding' && gameState.state !== 'ended'">
             <div class="text-body1">The empty jackpot was funded by all players.</div>
           </div>
         </div>
@@ -95,7 +95,7 @@
         <div v-else-if="gameState.state === 'ended'" class="q-mt-md">
           <div class="row">
             <div class="text-subtitle1">
-              Select a player to withdraw prizes from:
+              Select a player to withdraw prizes for:
             </div>
           </div>
           <div class="row">
@@ -157,7 +157,8 @@
           "Halb - האַלב",
           "Shtel Arayn - שטעל אַרַײן",
         ],
-        lastGameState: "loading",
+        lastState: "loading",
+        state: "loading",
         isAnimating: false,
         gameState: {
           state: "loading",
@@ -189,7 +190,7 @@
             return `Player ${this.gameState.last_player + 1} won half the jackpot.`
           case 3:
             if (this.gameState.state === "shtel") {
-              return `Player ${this.gameState.last_player + 1} lost - must pay again.`
+              return `Player ${this.gameState.last_player + 1} lost but doesn't have enough on balance - must pay again.`
             } else {
               return `Player ${this.gameState.last_player + 1} lost - paid again from balance.`
             }
@@ -255,6 +256,7 @@
             this.balanceUpdateInterval = null
             this.balances = this.gameState.balances
             this.jackpot = this.gameState.jackpot
+            this.state = this.gameState.state
           }
         }, 20)
       },
@@ -296,7 +298,7 @@
           this.dreidelAngle = initialAngle + ((4 - responseData.dreidel_result) * 90) + (Math.floor((this.dreidelAngle - initialAngle) / 360) + responseData.spin_seconds) * 360
           await new Promise(resolve => setTimeout(resolve, responseData.spin_seconds * 1000))
           if (responseData.temporary_state) {
-            this.lastGameState = this.gameState.state
+            this.lastState = this.gameState.state
             this.gameState = responseData.temporary_state
             this.onGameStatusUpdate()
             await new Promise(resolve => setTimeout(resolve, 4000))
@@ -306,7 +308,7 @@
           this.dreidelTimeoutSeconds = 0
           this.dreidelAngle = initialAngle + (4 - responseData.dreidel_result) * 90
         }
-        this.lastGameState = this.gameState.state
+        this.lastState = this.gameState.state
         this.gameState = responseData
         this.onGameStatusUpdate()
         this.resetReloadTimeout(this.reloadGameState, 2000)
