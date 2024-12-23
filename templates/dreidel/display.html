@@ -301,7 +301,6 @@
         }
         if (this.gameState.state === "playing" && responseData.state !== "ended") {
           this.isAnimating = true
-          this.gameState.jackpot += responseData.paid_amount
           this.onGameStatusUpdate()
           this.dreidelTimeoutSeconds = responseData.spin_seconds
           this.dreidelAngle = initialAngle + ((4 - responseData.dreidel_result) * 90) + (Math.floor((this.dreidelAngle - initialAngle) / 360) + responseData.spin_seconds) * 360
